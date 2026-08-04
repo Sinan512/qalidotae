@@ -20,6 +20,20 @@
     <!-- Hero asset preloads keep the opening frame instant -->
     <link rel="preload" as="image" href="/logo.png" />
 
+    <!-- Import map: three's example loaders import the bare "three" specifier,
+         so it must be mapped before any module script runs. -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+        }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+
+
     <link rel="stylesheet" href="/stylesheets/style.css" />
   </head>
   <body>

@@ -11,8 +11,11 @@
 <!-- ============================ NAVBAR ============================ -->
 <header class="nav" id="nav">
   <div class="nav__inner">
-    {{!-- Empty slot the opening logo flies into (Scene 1) --}}
-    <div class="nav__logoSlot" id="navLogoSlot" aria-hidden="true"></div>
+    {{!-- The flying opening logo lands exactly on this slot (Scene 1), then the
+          real mark inside it takes over so it stays put on scroll/resize. --}}
+    <div class="nav__logoSlot" id="navLogoSlot">
+      <img src="/logo.png" alt="Qalid" class="nav__logo" id="navLogo" width="46" height="46" />
+    </div>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
       <a href="#showcase">Craft</a>
       <a href="#packaging">Packaging</a>

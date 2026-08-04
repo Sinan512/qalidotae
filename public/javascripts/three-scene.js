@@ -1,79 +1,114 @@
 /* ==========================================================================
    three-scene.js
    One WebGL renderer, one RAF loop, two GLB models (thobe + box).
-   Exposes a plain numeric `state` object that GSAP timelines tween; the render
-   loop reads that state each frame, so scroll scrubbing never fights the
-   animation loop.
+
+   Everything geometric is derived from the models' real bounding boxes, so the
+   framing, the fold and the slide into the box stay correct on any screen and
+   with any GLB scale. GSAP only ever tweens the plain numbers in `state`; the
+   render loop reads them each frame, so scroll scrubbing never fights the loop.
    ========================================================================== */
 
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js";
-import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/loaders/GLTFLoader.js";
+// Bare specifiers resolved by the import map in views/layout.hbs
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 const DRESS_URL = "/thobDress.glb";
 const BOX_URL = "/logoBox.glb";
 
-/** Fit a loaded model into a target height and re-center it on the origin. */
+const DRESS_HEIGHT = 3.1; // world units — the whole scene is scaled around this
+const BOX_HEIGHT = 1.25;
+
+/** Fit a loaded model to a target height and centre it on its own origin. */
 function normalize(object3D, targetHeight) {
-  const box = new THREE.Box3().setFromObject(object3D);
+  const bounds = new THREE.Box3().setFromObject(object3D);
   const size = new THREE.Vector3();
   const center = new THREE.Vector3();
-  box.getSize(size);
-  box.getCenter(center);
+  bounds.getSize(size);
+  bounds.getCenter(center);
 
-  const scale = targetHeight / (size.y || 1);
-  object3D.scale.setScalar(scale);
-  object3D.position.sub(center.multiplyScalar(scale));
+  const k = targetHeight / (size.y || 1);
+  object3D.scale.setScalar(k);
+  object3D.position.set(-center.x * k, -center.y * k, -center.z * k);
 
   const wrapper = new THREE.Group();
   wrapper.add(object3D);
-  return { wrapper, size: size.multiplyScalar(scale) };
+  return { wrapper, size: size.multiplyScalar(k) };
 }
 
 /** Best-effort lid detection so the box can open convincingly. */
-function extractLid(root) {
-  let lid = null;
+function findLid(root) {
+  let byName = null;
+  let highest = null;
+  let highestY = -Infinity;
+
   root.traverse((child) => {
     if (!child.isMesh) return;
     const name = (child.name || "").toLowerCase();
-    if (/lid|cover|top|cap/.test(name)) lid = lid || child;
+    if (!byName && /lid|cover|top|cap|flap/.test(name)) byName = child;
+
+    const b = new THREE.Box3().setFromObject(child);
+    if (b.max.y > highestY) {
+      highestY = b.max.y;
+      highest = child;
+    }
   });
 
-  if (!lid) {
-    // Fallback: the mesh whose bounds sit highest is treated as the lid.
-    let highest = -Infinity;
-    root.traverse((child) => {
-      if (!child.isMesh) return;
-      const b = new THREE.Box3().setFromObject(child);
-      if (b.max.y > highest) {
-        highest = b.max.y;
-        lid = child;
-      }
-    });
-  }
-  return lid;
+  return byName || highest;
+}
+
+/**
+ * Re-parent the lid onto a hinge pivot at its rear-bottom edge.
+ * Bounds are converted into the lid's PARENT space (the previous version mixed
+ * world bounds with local coordinates, which made the lid swing off-axis).
+ */
+function buildLidPivot(lidMesh) {
+  if (!lidMesh || !lidMesh.parent) return null;
+
+  const parent = lidMesh.parent;
+  parent.updateMatrixWorld(true);
+
+  const world = new THREE.Box3().setFromObject(lidMesh);
+  const min = parent.worldToLocal(world.min.clone());
+  const max = parent.worldToLocal(world.max.clone());
+
+  const hinge = new THREE.Vector3(
+    (min.x + max.x) / 2,
+    Math.min(min.y, max.y),
+    Math.min(min.z, max.z) // rear edge
+  );
+
+  const pivot = new THREE.Group();
+  pivot.position.copy(hinge);
+  parent.add(pivot);
+
+  lidMesh.position.sub(hinge);
+  pivot.add(lidMesh);
+  return pivot;
 }
 
 export async function createStage({ canvas, viewport, onProgress }) {
-  const isMobile = window.matchMedia("(max-width: 860px)").matches;
+  const mqPhone = window.matchMedia("(max-width: 700px)");
+  const mqTablet = window.matchMedia("(max-width: 1024px)");
+  let isPhone = mqPhone.matches;
+  let isTablet = mqTablet.matches;
 
   const renderer = new THREE.WebGLRenderer({
     canvas,
-    antialias: !isMobile, // antialiasing is the first thing to drop on mobile
+    antialias: !isPhone, // antialiasing is the first thing to drop on phones
     alpha: true,
     powerPreference: "high-performance",
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.75 : 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isPhone ? 1.6 : 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-  camera.position.set(0, 0, 7.4);
 
   // Soft studio lighting — no harsh speculars, keeps the white theme calm.
   scene.add(new THREE.HemisphereLight(0xffffff, 0xdfe9e6, 1.05));
-  const key = new THREE.DirectionalLight(0xffffff, 1.5);
+  const key = new THREE.DirectionalLight(0xffffff, 1.45);
   key.position.set(2.6, 3.4, 4.2);
   scene.add(key);
   const rim = new THREE.DirectionalLight(0xdfeef0, 0.7);
@@ -85,18 +120,18 @@ export async function createStage({ canvas, viewport, onProgress }) {
   const progress = { dress: 0, box: 0 };
   const report = () => onProgress && onProgress((progress.dress + progress.box) / 2);
 
-  const load = (url, keyName) =>
+  const load = (url, name) =>
     new Promise((resolve, reject) => {
       loader.load(
         url,
         (gltf) => {
-          progress[keyName] = 1;
+          progress[name] = 1;
           report();
           resolve(gltf.scene);
         },
         (evt) => {
           if (evt.total) {
-            progress[keyName] = evt.loaded / evt.total;
+            progress[name] = evt.loaded / evt.total;
             report();
           }
         },
@@ -106,120 +141,168 @@ export async function createStage({ canvas, viewport, onProgress }) {
 
   const [dressRaw, boxRaw] = await Promise.all([load(DRESS_URL, "dress"), load(BOX_URL, "box")]);
 
-  const dress = normalize(dressRaw, 3.1);
-  const box = normalize(boxRaw, 1.15);
+  const dress = normalize(dressRaw, DRESS_HEIGHT);
+  const box = normalize(boxRaw, BOX_HEIGHT);
 
   const dressGroup = dress.wrapper;
   const boxGroup = box.wrapper;
   boxGroup.visible = false;
   scene.add(dressGroup, boxGroup);
 
-  // Put the lid on its own pivot at the rear edge so it hinges open.
-  const lidMesh = extractLid(boxRaw);
-  let lidPivot = null;
-  if (lidMesh) {
-    const bounds = new THREE.Box3().setFromObject(lidMesh);
-    const local = lidMesh.parent;
-    lidPivot = new THREE.Group();
-    lidPivot.position.set(0, bounds.max.y, bounds.min.z);
-    local.add(lidPivot);
-    lidMesh.position.sub(lidPivot.position);
-    lidPivot.add(lidMesh);
-  }
+  const lidPivot = buildLidPivot(findLid(boxRaw));
+
+  /* ------------------------------------------------------------ geometry ---
+     Every landmark below comes from the measured models, so the folded piece
+     always meets the box mouth instead of a guessed offset.                */
+  const BOX_Y = -DRESS_HEIGHT * 0.34; // where the box rests
+  const MOUTH_Y = BOX_Y + box.size.y * 0.5; // top rim of the box
+  const INSIDE_Y = BOX_Y + box.size.y * 0.12; // resting height inside the box
+  const RISE_FROM = -(DRESS_HEIGHT * 0.5 + 1.6); // fully below frame at reveal 0
+
+  // Folded footprint: shrink the piece until it fits the box interior.
+  const fitK = Math.min(1, (box.size.x * 0.74) / (dress.size.x || 1));
+  const SLAB = { x: fitK, y: fitK * 0.17, z: fitK * 0.9 };
 
   // ------------------------------------------------------------------ state
-  // Every value is 0..1 (or radians) and driven exclusively by GSAP.
   const state = {
     reveal: 0, // dress rises from below
     rotate: 0, // radians, showcase rotation
-    fold: 0, // folding simulation
+    fold: 0, // 0..1 cloth fold
     boxIn: 0, // box entrance
     lid: 0, // lid open amount
-    drop: 0, // folded dress descending into the box
+    slide: 0, // folded piece sliding into the box
     close: 0, // lid closing
     zoom: 0, // camera dolly toward the piece
-    floatAmp: isMobile ? 0.045 : 0.075,
+    pack: 0, // reframe from thobe to box
+    floatAmp: isPhone ? 0.04 : 0.075,
   };
+
+  // --------------------------------------------------------------- framing
+  // Distance that keeps the tallest/widest subject inside the frustum.
+  let baseZ = 7;
+  function frame() {
+    const w = Math.max(1, viewport.clientWidth);
+    const h = Math.max(1, viewport.clientHeight);
+    const aspect = w / h;
+
+    renderer.setSize(w, h, false);
+    camera.aspect = aspect;
+
+    const vFov = (camera.fov * Math.PI) / 180;
+    // Copy sits beside the piece on desktop/tablet and below it on phones, so
+    // the safe area differs per breakpoint.
+    const margin = isPhone ? 1.28 : isTablet ? 1.5 : 1.62;
+    const needH = (DRESS_HEIGHT * margin * 0.5) / Math.tan(vFov / 2);
+    const needW = (dress.size.x * margin * 0.5) / (Math.tan(vFov / 2) * aspect);
+    baseZ = Math.max(needH, needW, 4.2);
+    camera.updateProjectionMatrix();
+  }
+
+  function readBreakpoints() {
+    isPhone = mqPhone.matches;
+    isTablet = mqTablet.matches;
+    state.floatAmp = isPhone ? 0.04 : 0.075;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isPhone ? 1.6 : 2));
+  }
+
+  readBreakpoints();
+  frame();
+
+  let resizeTimer;
+  const onResize = () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      readBreakpoints();
+      frame();
+    }, 120);
+  };
+  window.addEventListener("resize", onResize);
+  window.addEventListener("orientationchange", onResize);
 
   // --------------------------------------------------------------- rendering
   const clock = new THREE.Clock();
-  let visible = true;
   let running = true;
 
-  function resize() {
-    const w = viewport.clientWidth;
-    const h = viewport.clientHeight;
-    renderer.setSize(w, h, false);
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
+  /* Pause the loop while the canvas is off-screen.
+     A rect test is used instead of an IntersectionObserver because once
+     ScrollTrigger pins the viewport the observer stops reporting intersections
+     and the renderer would silently stay parked (blank canvas). */
+  function onScreen() {
+    const r = viewport.getBoundingClientRect();
+    return r.bottom > -120 && r.top < window.innerHeight + 120 && r.width > 0;
   }
-  resize();
 
-  let resizeTimer;
-  window.addEventListener("resize", () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(resize, 120);
-  });
+  const tmp = new THREE.Vector3();
 
-  // Pause the loop entirely when the canvas is off-screen.
-  const io = new IntersectionObserver(
-    (entries) => {
-      visible = entries[0].isIntersecting;
-    },
-    { rootMargin: "10% 0px" }
-  );
-  io.observe(viewport);
-
-  function frame() {
+  function tick() {
     if (!running) return;
-    requestAnimationFrame(frame);
-    if (!visible) return;
+    requestAnimationFrame(tick);
+    if (!onScreen()) return;
+
 
     const t = clock.getElapsedTime();
 
-    // Gentle suspended float — damped out while the piece is being folded.
-    const settle = 1 - Math.min(1, state.fold + state.drop);
+    // Gentle suspended float — damped out once the piece starts folding.
+    const settle = 1 - Math.min(1, state.fold + state.slide);
     const float = Math.sin(t * 0.75) * state.floatAmp * settle;
     const sway = Math.sin(t * 0.45) * 0.035 * settle;
 
-    // Dress: rise, rotate, fold, then drop into the box.
-    const baseY = -3.4 + 3.4 * state.reveal;
-    dressGroup.position.y = baseY + float - state.drop * 1.55 - state.fold * 0.35;
-    dressGroup.position.x = sway * 0.6;
-    dressGroup.rotation.y = state.rotate + sway * 0.25;
-
-    // Folding simulation: compress vertically, widen slightly, tilt flat.
+    /* ---------------------------------------------------- the thobe ------ */
     const f = state.fold;
-    dressGroup.scale.set(1 + f * 0.2, 1 - f * 0.78, 1 + f * 0.34);
-    dressGroup.rotation.x = -f * 0.42;
-    dressGroup.rotation.z = f * 0.06;
-    dressGroup.visible = state.reveal > 0.001 && state.drop < 0.995;
+    const restY = RISE_FROM + (0 - RISE_FROM) * state.reveal; // rise into centre
+    // After folding it hovers just above the box mouth, then slides in.
+    const hoverY = MOUTH_Y + box.size.y * 0.55;
+    const foldedY = restY + (hoverY - restY) * f;
+    dressGroup.position.y = foldedY + (INSIDE_Y - hoverY) * state.slide + float;
+    dressGroup.position.x = sway * 0.6 * (1 - f);
+    dressGroup.position.z = 0;
 
-    // Box: fades/scales in, hinges open, closes again.
+    // Cloth-like fold: compress vertically while the sleeves fold inward.
+    tmp.set(1 + (SLAB.x - 1) * f, 1 + (SLAB.y - 1) * f, 1 + (SLAB.z - 1) * f);
+    dressGroup.scale.copy(tmp);
+    dressGroup.rotation.y = state.rotate * (1 - f) + sway * 0.25 * (1 - f);
+    dressGroup.rotation.x = -f * 0.16; // slight settle tilt, not a squash
+    dressGroup.rotation.z = f * 0.03;
+    dressGroup.visible = state.reveal > 0.001;
+
+    /* ------------------------------------------------------- the box ----- */
     boxGroup.visible = state.boxIn > 0.001;
-    boxGroup.position.y = -0.95 + (1 - state.boxIn) * -0.6;
-    boxGroup.scale.setScalar(0.82 + state.boxIn * 0.18);
-    boxGroup.rotation.y = -0.5 + state.boxIn * 0.5 + sway * 0.15;
+    boxGroup.position.y = BOX_Y - (1 - state.boxIn) * 0.7;
+    boxGroup.position.x = 0;
+    boxGroup.scale.setScalar(0.86 + state.boxIn * 0.14);
+    const open = Math.max(0, state.lid - state.close);
+    boxGroup.rotation.y = -0.42 + state.boxIn * 0.42 + sway * 0.12;
     if (lidPivot) {
-      const open = Math.max(0, state.lid - state.close);
-      lidPivot.rotation.x = -open * 1.85;
+      lidPivot.rotation.x = -open * 1.9;
+      boxGroup.rotation.x = 0;
+    } else {
+      // No identifiable lid: tilt the whole box open instead of doing nothing.
+      boxGroup.rotation.x = -open * 0.5;
     }
 
-    // Camera dolly — slow, always forward.
-    camera.position.z = 7.4 - state.zoom * 1.7;
-    camera.position.y = 0.15 * state.zoom;
-    camera.lookAt(0, -0.2 - state.drop * 0.5, 0);
+    /* ------------------------------------------------------- camera ------ */
+    // Dolly in for the showcase, then pull back slightly to hold thobe + box.
+    camera.position.z = baseZ * (1 - 0.14 * state.zoom + 0.1 * state.pack);
+    camera.position.y = 0.12 * state.zoom + 0.05 * state.pack;
+    camera.lookAt(0, -0.15 * state.zoom + (BOX_Y + 0.25) * state.pack, 0);
 
     renderer.render(scene, camera);
   }
-  requestAnimationFrame(frame);
+  requestAnimationFrame(tick);
 
   return {
     state,
-    isMobile,
+    get isPhone() {
+      return isPhone;
+    },
+    get isTablet() {
+      return isTablet;
+    },
+    refresh: frame,
     dispose() {
       running = false;
-      io.disconnect();
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onResize);
       renderer.dispose();
     },
   };

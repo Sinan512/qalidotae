@@ -20,6 +20,7 @@ const CONTACT = {
 gsap.registerPlugin(ScrollTrigger);
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const isPhone = () => window.matchMedia("(max-width: 700px)").matches;
 const $ = (sel) => document.querySelector(sel);
 
 /* ------------------------------- contact wiring -------------------------- */
@@ -43,7 +44,13 @@ function wireContact() {
   if (year) year.textContent = new Date().getFullYear();
 }
 
-/* ----------------------- Scene 1: logo into the navbar ------------------- */
+/* ----------------------- Scene 1: logo into the navbar -------------------
+   The flying mark is `position: fixed`, so its untransformed box never moves
+   while the page scrolls. That makes a true FLIP possible: we measure the
+   start box and the navbar slot once per ScrollTrigger refresh and animate
+   from `transform-origin: 0 0`, so the mark lands exactly on the slot at every
+   viewport width. Once it has landed, the real navbar logo takes over.
+   ------------------------------------------------------------------------ */
 function initOpening() {
   const logo = $("#heroLogo");
   const slot = $("#navLogoSlot");
@@ -55,13 +62,34 @@ function initOpening() {
   gsap.to(logo, { opacity: 1, duration: 1.8, ease: "power2.out", delay: 0.25 });
   gsap.to(hint, { opacity: 1, duration: 1.2, delay: 1.6, ease: "power2.out" });
 
+  const park = (parked) => {
+    logo.classList.toggle("is-parked", parked); // hides the flying copy
+    nav.classList.toggle("is-landed", parked); // reveals the navbar copy
+  };
+
   if (reduceMotion) {
     nav.classList.add("is-active");
+    park(true);
     gsap.set(links, { opacity: 1 });
     return;
   }
 
-  // The logo physically travels from centre to the navbar slot as you scroll.
+  // FLIP measurement, cached per refresh so scrubbing stays cheap and stable.
+  const flip = { x: 0, y: 0, scale: 1 };
+  function measure() {
+    const prev = logo.style.transform;
+    logo.style.transform = "none";
+    const a = logo.getBoundingClientRect();
+    const b = slot.getBoundingClientRect();
+    logo.style.transform = prev;
+
+    flip.x = b.left - a.left;
+    flip.y = b.top - a.top;
+    flip.scale = a.width ? b.width / a.width : 1;
+  }
+  measure();
+  ScrollTrigger.addEventListener("refreshInit", measure);
+
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: "#opening",
@@ -70,25 +98,21 @@ function initOpening() {
       scrub: 1, // scrubbed with smoothing = no sudden jumps
       invalidateOnRefresh: true,
       onEnter: () => nav.classList.add("is-active"),
-      onLeaveBack: () => nav.classList.remove("is-active"),
+      onLeaveBack: () => {
+        nav.classList.remove("is-active");
+        park(false);
+      },
+      onLeave: () => park(true),
+      onEnterBack: () => park(false),
     },
   });
 
   tl.to(hint, { opacity: 0, duration: 0.1 }, 0).to(
     logo,
     {
-      // FLIP-style measurement, recomputed on refresh so it stays responsive
-      x: () => {
-        const a = logo.getBoundingClientRect();
-        const b = slot.getBoundingClientRect();
-        return b.left + b.width / 2 - (a.left + a.width / 2);
-      },
-      y: () => {
-        const a = logo.getBoundingClientRect();
-        const b = slot.getBoundingClientRect();
-        return b.top + b.height / 2 - (a.top + a.height / 2);
-      },
-      scale: () => slot.getBoundingClientRect().width / logo.getBoundingClientRect().width,
+      x: () => flip.x,
+      y: () => flip.y,
+      scale: () => flip.scale,
       ease: "power2.inOut",
       duration: 1,
     },
@@ -111,12 +135,17 @@ function initOpening() {
   });
 }
 
-/* ----------------- Scenes 2–4: one pinned, scrubbed timeline -------------- */
+/* ----------------- Scenes 2–4: one pinned, scrubbed timeline --------------
+   Beat map (timeline seconds):
+     0.0–2.0  rise + camera dolly + hero copy
+     2.1–6.7  rotate ~150° out and back, four copy panels keyed to it
+     6.9–13   fold, box enters, lid opens, piece slides in, lid closes
+   ------------------------------------------------------------------------ */
 function initStory(stage) {
   const { state } = stage;
   const panels = gsap.utils.toArray(".panel");
-  // ~150° out and back — deliberately never a full spin.
-  const SWEEP = (stage.isMobile ? 120 : 150) * (Math.PI / 180);
+  // ~150° out and back — deliberately never a full spin. Narrower on phones.
+  const SWEEP = (stage.isPhone ? 115 : 150) * (Math.PI / 180);
 
   const tl = gsap.timeline({
     defaults: { ease: "power2.inOut" },
@@ -125,6 +154,7 @@ function initStory(stage) {
       start: "top top",
       end: "bottom bottom",
       pin: "#stageViewport",
+      pinType: "fixed",
       scrub: 1,
       anticipatePin: 1,
       invalidateOnRefresh: true,
@@ -137,7 +167,7 @@ function initStory(stage) {
     .to("#heroCopy", { opacity: 1, duration: 0.7, ease: "power2.out" }, 0.5)
     .to("#heroCopy", { opacity: 0, duration: 0.5 }, 1.9);
 
-  /* Scene 3 — rotate ~150°, hold, rotate back; copy keyed to each quarter */
+  /* Scene 3 — rotate ~150°, then back to a guaranteed front view */
   tl.to(state, { rotate: SWEEP, duration: 2.4, ease: "power1.inOut" }, 2.1);
   tl.to(state, { rotate: 0, duration: 2.0, ease: "power1.inOut" }, 4.7);
 
@@ -151,18 +181,20 @@ function initStory(stage) {
     ).to(panel, { opacity: 0, y: -20, duration: 0.45 }, at + 0.75);
   });
 
-  /* Scene 4 — front view, elegant fold, box opens, piece settles inside */
+  /* Scene 4 — fold, box opens, piece slides in, lid closes */
   tl.to("#packaging", { opacity: 1, duration: 0.6, ease: "power2.out" }, 6.9)
-    // staged fold so it reads as cloth, not a single squash
+    .to(state, { pack: 1, duration: 1.4, ease: "power2.inOut" }, 6.9)
+    // two-beat fold so it reads as cloth, not one squash
     .to(state, { fold: 0.45, duration: 0.9, ease: "power2.inOut" }, 7.1)
-    .to(state, { fold: 1, duration: 1.1, ease: "power2.inOut" }, 8.1)
-    .to(state, { boxIn: 1, duration: 1.0, ease: "power3.out" }, 8.0)
-    .to(state, { lid: 1, duration: 0.9, ease: "power2.out" }, 8.9)
-    .to(state, { drop: 1, duration: 1.2, ease: "power2.inOut" }, 9.7)
-    .to(state, { close: 1, duration: 1.1, ease: "power2.inOut" }, 10.9)
+    .to(state, { boxIn: 1, duration: 1.0, ease: "power3.out" }, 7.6)
+    .to(state, { fold: 1, duration: 1.0, ease: "power2.inOut" }, 8.1)
+    .to(state, { lid: 1, duration: 0.9, ease: "power2.out" }, 8.7)
+    // slide into the measured box mouth
+    .to(state, { slide: 1, duration: 1.2, ease: "power2.inOut" }, 9.7)
+    .to(state, { close: 1, duration: 1.1, ease: "power2.inOut" }, 11.0)
     // brief hold on the closed, branded box
-    .to({}, { duration: 0.9 }, 12.0)
-    .to("#packaging", { opacity: 0, duration: 0.5 }, 12.6);
+    .to({}, { duration: 0.9 }, 12.1)
+    .to("#packaging", { opacity: 0, duration: 0.5 }, 12.7);
 }
 
 /* --------------------------- Scenes 6–7: reveals ------------------------- */
@@ -189,7 +221,12 @@ function initReveals() {
 async function boot() {
   wireContact();
   initOpening();
-  initGallery({ section: $("#collection"), track: $("#galleryTrack") });
+  initGallery({
+    section: $("#collection"),
+    track: $("#galleryTrack"),
+    reduceMotion,
+    isPhone,
+  });
   initReveals();
 
   const loader = $("#loader");
@@ -209,11 +246,13 @@ async function boot() {
     });
     loader.classList.add("is-done");
     initStory(stage);
+    ScrollTrigger.addEventListener("refresh", stage.refresh);
     ScrollTrigger.refresh();
   } catch (err) {
     // Graceful degradation: the copy-driven scenes still work without WebGL.
     console.error("3D stage unavailable:", err);
     loader.classList.add("is-done");
+    document.getElementById("stage")?.classList.add("is-fallback");
     gsap.set(["#heroCopy", ".panel", "#packaging"], { opacity: 1 });
   }
 }

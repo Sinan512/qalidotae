@@ -153,26 +153,43 @@ button {
   box-shadow: 0 12px 40px -32px rgba(13, 40, 45, 0.6);
 }
 
+/* Flush left/right row — the logo slot sits on the header's true left edge */
 .nav__inner {
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 14px clamp(18px, 4vw, 44px);
+  width: 100%;
+  padding: clamp(10px, 1.6vw, 16px) clamp(16px, 4vw, 44px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 18px;
 }
 
 .nav__logoSlot {
-  width: 46px;
-  height: 46px;
+  position: relative;
+  width: clamp(34px, 4.4vw, 46px);
+  height: clamp(34px, 4.4vw, 46px);
   flex: 0 0 auto;
+  margin-right: auto; /* keeps the mark hard-left at any width */
+}
+
+/* The real navbar mark: revealed the moment the flying logo lands. */
+.nav__logo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+}
+
+.nav.is-landed .nav__logo {
+  opacity: 1;
 }
 
 .nav__links {
   display: flex;
-  gap: clamp(14px, 2.6vw, 34px);
-  font-size: 0.78rem;
+  gap: clamp(12px, 2.6vw, 34px);
+  font-size: clamp(0.66rem, 1.2vw, 0.78rem);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   opacity: 0;
@@ -216,11 +233,26 @@ button {
   place-items: center;
 }
 
+/* The flying mark is fixed, so its untransformed box never moves while the page
+   scrolls — that's what lets the FLIP land exactly on the navbar slot.
+   Centring uses the separate `translate` property so GSAP owns `transform`. */
 .opening__logo {
-  width: clamp(150px, 20vw, 240px);
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  transform-origin: 0 0;
+  width: clamp(130px, 18vw, 240px);
   height: auto;
   opacity: 0;
+  z-index: 55;
+  pointer-events: none;
   will-change: transform, opacity;
+}
+
+/* Once it has landed, the navbar copy takes over and this one steps aside. */
+.opening__logo.is-parked {
+  opacity: 0 !important;
 }
 
 .opening__hint {
@@ -541,40 +573,77 @@ button {
   transform: translateY(18px);
 }
 
-/* -------------------------------- mobile -------------------------------- */
+/* ------------------------------ tablet (<=1024) -------------------------- */
 
-@media (max-width: 860px) {
+@media (max-width: 1024px) {
   .stage {
-    height: 560svh;
+    height: 600svh;
+  }
+
+  .stage__hero,
+  .stage__pack {
+    max-width: min(360px, 44vw);
+  }
+
+  .panel {
+    width: min(320px, 46vw);
+    padding: 22px 24px;
+  }
+
+  .card {
+    width: clamp(240px, 42vw, 330px);
+  }
+}
+
+/* ------------------------------ phone (<=700) ---------------------------- */
+
+@media (max-width: 700px) {
+  .stage {
+    height: 520svh;
+  }
+
+  /* Lift the 3D subject so the copy below never covers it */
+  .stage__canvas {
+    transform: translateY(-9%);
   }
 
   .stage__hero,
   .stage__pack {
     top: auto;
-    bottom: 8svh;
-    left: 20px;
-    right: 20px;
+    bottom: 6svh;
+    left: 18px;
+    right: 18px;
     max-width: none;
     transform: none;
     text-align: left;
   }
 
+  .stage__hero .lede,
   .stage__pack .lede {
     margin-left: 0;
+    max-width: none;
   }
 
   .panel {
     top: auto;
-    bottom: 7svh;
-    left: 18px;
-    right: 18px;
+    bottom: 6svh;
+    left: 16px;
+    right: 16px;
     width: auto;
     transform: none;
-    padding: 20px 22px;
+    padding: 18px 20px;
+  }
+
+  .panel p {
+    font-size: 0.88rem;
+  }
+
+  .collection__track {
+    padding-inline: 16px;
   }
 
   .card {
-    width: 74vw;
+    width: 78vw;
   }
 
   .contact__list a {
@@ -582,6 +651,29 @@ button {
     align-items: flex-start;
     gap: 6px;
   }
+
+  .btn {
+    padding: 15px 32px;
+  }
+}
+
+/* Phones (and reduced motion) swipe the collection natively instead of
+   scrubbing a pinned horizontal timeline. */
+.collection.is-swipe .collection__track {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  transform: none !important;
+}
+
+.collection.is-swipe .collection__track::-webkit-scrollbar {
+  display: none;
+}
+
+.collection.is-swipe .card {
+  scroll-snap-align: center;
+  transform: none !important;
 }
 
 /* ------------------------- reduced motion fallback ---------------------- */
