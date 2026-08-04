@@ -11,10 +11,10 @@ import { initGallery } from "/javascripts/gallery.js";
    CONTACT CONFIG — placeholder data, swap these three values for the real ones
    --------------------------------------------------------------------------- */
 const CONTACT = {
-  whatsapp: "+971500000000", // digits only for the wa.me link
-  whatsappDisplay: "+971 50 000 0000",
-  email: "hello@qalid.com",
-  instagram: "qalid",
+  whatsapp: "+917558056808", // digits only for the wa.me link
+  whatsappDisplay: "+917558056808",
+  email: "qalidot7@gmail.com",
+  instagram: "qalidot.ae",
 };
 
 gsap.registerPlugin(ScrollTrigger);
