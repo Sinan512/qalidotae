@@ -1,10 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{title}}</title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <meta
+      name="description"
+      content="Qalid — a luxury thobe atelier. Premium fabric, hand-finished embroidery and an elegant fit, presented as a cinematic product launch."
+    />
+
+    <!-- Premium type pairing: serif display + clean sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Hero asset preloads keep the opening frame instant -->
+    <link rel="preload" as="image" href="/logo.png" />
+
+    <link rel="stylesheet" href="/stylesheets/style.css" />
   </head>
   <body>
     {{{body}}}
+
+    <!-- GSAP + ScrollTrigger (no npm dependencies added) -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+    <!-- Application modules (ESM, deferred by nature) -->
+    <script type="module" src="/javascripts/main.js"></script>
   </body>
 </html>

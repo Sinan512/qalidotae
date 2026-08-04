@@ -1,8 +1,600 @@
+/* ==========================================================================
+   Qalid — luxury design system
+   Blue/green gradient wash, black typography, subtle gray accents.
+   ========================================================================== */
+
+:root {
+  --ink: #0d0f10;
+  --ink-soft: #4b5257;
+  --ink-faint: #9aa2a7;
+  --line: rgba(13, 15, 16, 0.08);
+  --panel: rgba(255, 255, 255, 0.72);
+  --shadow-soft: 0 18px 60px -30px rgba(13, 40, 45, 0.35);
+  --shadow-card: 0 30px 80px -40px rgba(13, 40, 45, 0.45);
+  --radius: 18px;
+  --radius-lg: 28px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --serif: "Cormorant Garamond", "Times New Roman", serif;
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: auto; /* GSAP owns the scroll feel */
+}
+
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  margin: 0;
+  font-family: var(--sans);
+  font-weight: 300;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+  line-height: 1.65;
+  overflow-x: hidden;
+  /* Blue + green mixed gradient background, kept pale so type stays crisp */
+  background:
+    radial-gradient(120% 90% at 12% 0%, #eaf4f6 0%, rgba(234, 244, 246, 0) 58%),
+    radial-gradient(110% 80% at 92% 12%, #e6f2ec 0%, rgba(230, 242, 236, 0) 55%),
+    linear-gradient(168deg, #f4fafb 0%, #eef7f4 42%, #f7fbfa 100%);
+  background-attachment: fixed;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
 }
 
 a {
-  color: #00B7FF;
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* ------------------------------ typography ------------------------------ */
+
+.display {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(2.1rem, 5.4vw, 4.4rem);
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  margin: 0.2em 0 0.4em;
+}
+
+.display em {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.34em;
+  color: var(--ink-faint);
+}
+
+.lede {
+  margin: 0;
+  max-width: 32ch;
+  color: var(--ink-soft);
+  font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+}
+
+/* -------------------------------- loader -------------------------------- */
+
+.loader {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+  padding: 26px;
+  transition: opacity 0.8s var(--ease);
+}
+
+.loader.is-done {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loader__bar {
+  width: 120px;
+  height: 1px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.loader__fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--ink);
+  transition: width 0.35s var(--ease);
+}
+
+/* -------------------------------- navbar -------------------------------- */
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  backdrop-filter: saturate(140%) blur(14px);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.4));
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.6s var(--ease), box-shadow 0.6s var(--ease);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nav.is-stuck {
+  border-bottom-color: var(--line);
+  box-shadow: 0 12px 40px -32px rgba(13, 40, 45, 0.6);
+}
+
+.nav__inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 14px clamp(18px, 4vw, 44px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.nav__logoSlot {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+}
+
+.nav__links {
+  display: flex;
+  gap: clamp(14px, 2.6vw, 34px);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0;
+}
+
+.nav__links a {
+  position: relative;
+  color: var(--ink-soft);
+  padding-bottom: 3px;
+  transition: color 0.4s var(--ease);
+}
+
+.nav__links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.5s var(--ease);
+}
+
+.nav__links a:hover {
+  color: var(--ink);
+}
+
+.nav__links a:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ---------------------------- scene 1: opening --------------------------- */
+
+.opening {
+  position: relative;
+  height: 100svh;
+  display: grid;
+  place-items: center;
+}
+
+.opening__logo {
+  width: clamp(150px, 20vw, 240px);
+  height: auto;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.opening__hint {
+  position: absolute;
+  bottom: 34px;
+  font-size: 0.62rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  opacity: 0;
+}
+
+/* -------------------- scenes 2–4: pinned 3D stage ----------------------- */
+
+.stage {
+  /* Tall scroll runway; the viewport inside is pinned by ScrollTrigger */
+  height: 620svh;
+  position: relative;
+}
+
+.stage__viewport {
+  height: 100svh;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.stage__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.stage__hero,
+.stage__pack {
+  position: absolute;
+  left: clamp(20px, 6vw, 90px);
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: min(420px, 46vw);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.stage__pack {
+  left: auto;
+  right: clamp(20px, 6vw, 90px);
+  text-align: right;
+}
+
+.stage__pack .lede {
+  margin-left: auto;
+}
+
+.stage__panels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.panel {
+  position: absolute;
+  top: 50%;
+  right: clamp(20px, 7vw, 110px);
+  transform: translateY(-50%);
+  width: min(340px, 42vw);
+  padding: 26px 28px;
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+}
+
+.panel__index {
+  font-size: 0.62rem;
+  letter-spacing: 0.34em;
+  color: var(--ink-faint);
+}
+
+.panel h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+  margin: 8px 0 10px;
+}
+
+.panel p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+}
+
+/* --------------------- scene 5: horizontal collection -------------------- */
+
+.collection {
+  position: relative;
+  padding: clamp(70px, 10vw, 140px) 0 0;
+}
+
+.collection__head {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 6vw, 90px) clamp(30px, 5vw, 60px);
+}
+
+.collection__head .display {
+  font-size: clamp(1.9rem, 4vw, 3.2rem);
+}
+
+.collection__track {
+  display: flex;
+  gap: clamp(20px, 3vw, 46px);
+  padding: 12px clamp(20px, 20vw, 30vw) 26px;
+  will-change: transform;
+}
+
+.card {
+  flex: 0 0 auto;
+  width: clamp(230px, 30vw, 380px);
+  margin: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-card);
+  transform: scale(0.94);
+  will-change: transform;
+}
+
+.card img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+.card figcaption {
+  padding: 16px 20px 20px;
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.collection__empty {
+  padding: 40px clamp(20px, 6vw, 90px);
+  color: var(--ink-faint);
+}
+
+/* ---------------------------- scene 6: contact --------------------------- */
+
+.contact {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(90px, 14vw, 190px) clamp(20px, 6vw, 90px);
+  text-align: center;
+}
+
+.contact .lede {
+  margin: 0 auto;
+}
+
+.contact__list {
+  list-style: none;
+  margin: clamp(34px, 6vw, 64px) auto;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+  max-width: 640px;
+}
+
+.contact__list a {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 26px;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid var(--line);
+  transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease),
+    background-color 0.5s var(--ease);
+}
+
+.contact__list a:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow-soft);
+}
+
+.contact__label {
+  font-size: 0.66rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.contact__value {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 17px 42px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 0.74rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease), opacity 0.4s var(--ease);
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 50px -26px rgba(13, 40, 45, 0.8);
+}
+
+/* ---------------------------- scene 7: footer ---------------------------- */
+
+.footer {
+  border-top: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.footer__inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(40px, 6vw, 74px) clamp(20px, 6vw, 90px);
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+  text-align: center;
+}
+
+.footer__logo {
+  width: 62px;
+  opacity: 0.85;
+}
+
+.footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(14px, 3vw, 32px);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.footer__nav a {
+  transition: color 0.4s var(--ease);
+}
+
+.footer__nav a:hover {
+  color: var(--ink);
+}
+
+.footer__social {
+  display: flex;
+  gap: 14px;
+}
+
+.footer__social a {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  transition: transform 0.45s var(--ease), color 0.45s var(--ease),
+    border-color 0.45s var(--ease);
+}
+
+.footer__social a:hover {
+  transform: translateY(-2px);
+  color: var(--ink);
+  border-color: rgba(13, 15, 16, 0.22);
+}
+
+.footer__social svg {
+  fill: currentColor;
+}
+
+.footer__copy {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+
+.footer__top {
+  font-size: 0.66rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--line);
+  transition: color 0.4s var(--ease), border-color 0.4s var(--ease);
+}
+
+.footer__top:hover {
+  color: var(--ink);
+  border-color: rgba(13, 15, 16, 0.3);
+}
+
+/* ------------------------------ reveal state ---------------------------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+/* -------------------------------- mobile -------------------------------- */
+
+@media (max-width: 860px) {
+  .stage {
+    height: 560svh;
+  }
+
+  .stage__hero,
+  .stage__pack {
+    top: auto;
+    bottom: 8svh;
+    left: 20px;
+    right: 20px;
+    max-width: none;
+    transform: none;
+    text-align: left;
+  }
+
+  .stage__pack .lede {
+    margin-left: 0;
+  }
+
+  .panel {
+    top: auto;
+    bottom: 7svh;
+    left: 18px;
+    right: 18px;
+    width: auto;
+    transform: none;
+    padding: 20px 22px;
+  }
+
+  .card {
+    width: 74vw;
+  }
+
+  .contact__list a {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
+
+/* ------------------------- reduced motion fallback ---------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .opening__logo,
+  .nav,
+  .nav__links,
+  .stage__hero,
+  .stage__pack,
+  .panel,
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
