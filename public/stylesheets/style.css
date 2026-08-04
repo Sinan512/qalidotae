@@ -366,12 +366,24 @@ button {
   font-size: clamp(1.9rem, 4vw, 3.2rem);
 }
 
+/* Marquee viewport: clips the endlessly drifting track. */
+.collection__marquee {
+  overflow: hidden;
+}
+
 .collection__track {
   display: flex;
   gap: clamp(20px, 3vw, 46px);
-  padding: 12px clamp(20px, 20vw, 30vw) 26px;
+  padding: 12px clamp(20px, 3vw, 46px) 26px;
+  width: max-content;
   will-change: transform;
 }
+
+/* Cards keep a fixed presentation while the row moves on its own. */
+.collection.is-marquee .card {
+  transform: none;
+}
+
 
 .card {
   flex: 0 0 auto;
@@ -602,9 +614,10 @@ button {
     height: 520svh;
   }
 
-  /* Lift the 3D subject so the copy below never covers it */
+  /* Lift the 3D subject so the copy below never covers it — kept shallow so
+     the top of the garment is never cropped. */
   .stage__canvas {
-    transform: translateY(-9%);
+    transform: translateY(-4%);
   }
 
   .stage__hero,

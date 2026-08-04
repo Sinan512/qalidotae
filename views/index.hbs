@@ -90,23 +90,27 @@
     <p class="eyebrow">The Collection</p>
     <h2 class="display">Every piece, in sequence</h2>
   </div>
-  <div class="collection__track" id="galleryTrack">
-    {{#each products}}
-      <figure class="card" data-card>
-        <img
-          src="{{this.url}}"
-          alt="{{this.alt}}"
-          loading="lazy"
-          decoding="async"
-          width="900"
-          height="1200"
-        />
-        <figcaption>{{this.name}}</figcaption>
-      </figure>
-    {{else}}
-      <p class="collection__empty">Collection imagery coming soon.</p>
-    {{/each}}
+  {{!-- The track drifts right to left on its own (see gallery.js) --}}
+  <div class="collection__marquee" id="galleryMarquee">
+    <div class="collection__track" id="galleryTrack">
+      {{#each products}}
+        <figure class="card" data-card>
+          <img
+            src="{{this.url}}"
+            alt="{{this.alt}}"
+            loading="lazy"
+            decoding="async"
+            width="900"
+            height="1200"
+          />
+          <figcaption>{{this.name}}</figcaption>
+        </figure>
+      {{else}}
+        <p class="collection__empty">Collection imagery coming soon.</p>
+      {{/each}}
+    </div>
   </div>
+
 </section>
 
 <!-- ====================== SCENE 6 — CONTACT ======================= -->

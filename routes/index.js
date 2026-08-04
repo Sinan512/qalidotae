@@ -16,7 +16,9 @@ function readProducts() {
     return fs
       .readdirSync(IMAGES_DIR)
       .filter(function (file) {
-        return IMAGE_EXT.test(file);
+        // Skip hidden/OS files (e.g. Android ".trashed-*" leftovers) — the
+        // static middleware refuses to serve dotfiles, so they render broken.
+        return file.charAt(0) !== '.' && IMAGE_EXT.test(file);
       })
       .sort()
       .map(function (file, i) {

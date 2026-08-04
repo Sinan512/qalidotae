@@ -186,7 +186,7 @@ function initStory(stage) {
     .to(state, { pack: 1, duration: 1.4, ease: "power2.inOut" }, 6.9)
     // two-beat fold so it reads as cloth, not one squash
     .to(state, { fold: 0.45, duration: 0.9, ease: "power2.inOut" }, 7.1)
-    .to(state, { boxIn: 1, duration: 1.0, ease: "power3.out" }, 7.6)
+    .to(state, { boxIn: 1, duration: 1.0, ease: "power3.out" }, 8.0)
     .to(state, { fold: 1, duration: 1.0, ease: "power2.inOut" }, 8.1)
     .to(state, { lid: 1, duration: 0.9, ease: "power2.out" }, 8.7)
     // slide into the measured box mouth
