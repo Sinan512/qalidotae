@@ -188,12 +188,14 @@ function initStory(stage) {
     .to(state, { fold: 0.45, duration: 0.9, ease: "power2.inOut" }, 7.1)
     .to(state, { boxIn: 1, duration: 1.0, ease: "power3.out" }, 8.0)
     .to(state, { fold: 1, duration: 1.0, ease: "power2.inOut" }, 8.1)
-    .to(state, { lid: 1, duration: 0.9, ease: "power2.out" }, 8.7)
-    // slide into the measured box mouth
+    // The box now stays SHUT and logo-forward while the piece goes in behind
+    // it, so the branded panel is the only thing facing the camera.
+    // slide behind the measured box
     .to(state, { slide: 1, duration: 1.2, ease: "power2.inOut" }, 9.7)
-    .to(state, { close: 1, duration: 1.1, ease: "power2.inOut" }, 11.0)
+    // the lid only closes once the piece is fully inside and faded out
+    .to(state, { close: 1, duration: 1.1, ease: "power2.inOut" }, 11.2)
     // brief hold on the closed, branded box
-    .to({}, { duration: 0.9 }, 12.1)
+    .to({}, { duration: 0.9 }, 12.3)
     .to("#packaging", { opacity: 0, duration: 0.5 }, 12.7);
 }
 

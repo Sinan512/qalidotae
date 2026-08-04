@@ -21,8 +21,26 @@ const BOX_URL = "/logoBox.glb";
 const DRESS_HEIGHT = 2.15;
 // The folded piece is measured against the thobe's own width, and the box is
 // then measured against the folded piece — nothing here is a guessed number.
-const BOX_WIDTH_RATIO = 0.62; // box width vs. hanging thobe width
-const BOX_FILL = 0.7; // folded piece occupies this much of the box mouth
+const BOX_WIDTH_RATIO = 0.7; // box width vs. hanging thobe (front-facing) width
+const BOX_FILL = 0.88; // folded piece fills this much of the box footprint
+
+/* Measured facing angles ------------------------------------------------------
+   All three GLBs are authored facing their own -X axis, so a -90 deg yaw is what
+   actually turns the camera-facing side into the FRONT of the garment (collar
+   opening + gold placket) instead of the back. The box model carries the Qalid
+   logo on its +Z face, so it needs no yaw at all. These were verified by
+   rendering each GLB at 0/90/180/270 deg and picking the view that shows the
+   front. Because of the -90 deg yaw, the on-screen width of the garments is
+   their LOCAL Z size and their on-screen depth is their local X size. */
+const DRESS_FRONT_YAW = -Math.PI / 2;
+const FOLD_FRONT_YAW = -Math.PI / 2;
+const BOX_FRONT_YAW = 0;
+
+const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+const smooth = (v) => {
+  const x = clamp01(v);
+  return x * x * (3 - 2 * x);
+};
 
 /** Fit a loaded model to a target height and centre it on its own origin. */
 function normalize(object3D, targetHeight) {
@@ -32,11 +50,6 @@ function normalize(object3D, targetHeight) {
 /** Fit a loaded model to a target width and centre it on its own origin. */
 function normalizeWidth(object3D, targetWidth) {
   return fitModel(object3D, (size) => targetWidth / (size.x || 1));
-}
-
-/** Fit a loaded model so its LARGEST dimension matches a target size. */
-function normalizeMax(object3D, targetSize) {
-  return fitModel(object3D, (size) => targetSize / (Math.max(size.x, size.y, size.z) || 1));
 }
 
 function fitModel(object3D, factor) {
@@ -196,12 +209,22 @@ export async function createStage({ canvas, viewport, onProgress }) {
 
   // 1. the hanging thobe sets the scale of the whole scene
   const dress = normalize(dressRaw, DRESS_HEIGHT);
-  // 2. the box is measured against the thobe's width, so both read at the
-  //    same scale as the gold trim on the garment
-  const box = normalizeWidth(boxRaw, dress.size.x * BOX_WIDTH_RATIO);
-  // 3. the folded piece is fitted to the box mouth on its LARGEST dimension,
-  //    so it can never poke out of the box whatever shape the GLB has
-  const folded = normalizeMax(foldRaw, box.size.x * BOX_FILL);
+  // The thobe is turned to its front, so the width we actually see on screen is
+  // its local Z size — that is the measurement everything else is built on.
+  const dressFrontWidth = dress.size.z;
+  // 2. the box is measured against the thobe's on-screen width, so both read at
+  //    the same scale as the gold trim on the garment
+  const box = normalizeWidth(boxRaw, dressFrontWidth * BOX_WIDTH_RATIO);
+  // 3. the folded piece is fitted to the BOX FOOTPRINT, not to a guessed size:
+  //    once it is laid flat its front-facing width (local Z) lies across the box
+  //    width and its length (local Y) lies along the box depth, so both are
+  //    matched here. It ends up filling the box like the real folded garment.
+  const folded = fitModel(foldRaw, (size) =>
+    Math.min(
+      (box.size.x * BOX_FILL) / (size.z || 1),
+      (box.size.z * BOX_FILL) / (size.y || 1)
+    )
+  );
 
   const dressGroup = dress.wrapper;
   const foldGroup = folded.wrapper;
@@ -257,7 +280,7 @@ export async function createStage({ canvas, viewport, onProgress }) {
     const margin = isPhone ? 2.1 : isTablet ? 1.55 : 1.62;
 
     const needH = (DRESS_HEIGHT * margin * 0.5) / Math.tan(vFov / 2);
-    const needW = (dress.size.x * margin * 0.5) / (Math.tan(vFov / 2) * aspect);
+    const needW = (dress.size.z * margin * 0.5) / (Math.tan(vFov / 2) * aspect);
     baseZ = Math.max(needH, needW, 4.2);
     camera.updateProjectionMatrix();
   }
@@ -312,38 +335,53 @@ export async function createStage({ canvas, viewport, onProgress }) {
     const sway = Math.sin(t * 0.45) * 0.035 * settle;
 
     /* ------------------------------------------- thobe -> folded piece ----
-       The hanging thobe cross-dissolves into foldDress.glb over the fold beat:
-       the hanging model shrinks a touch as it fades, the folded model grows
-       into place, so the change of geometry stays unnoticeable. The folded
-       piece then slides into the box mouth.                                */
+       The hand-over is a physical exit and re-entry, not a cross-dissolve:
+       the hanging thobe travels DOWN out of the bottom of the frame, and the
+       folded piece rides back UP into view from below, already turned to its
+       front (collar + placket). The folded piece then hovers over the box and
+       slides in.                                                            */
     const f = state.fold;
     const restY = RISE_FROM + (0 - RISE_FROM) * state.reveal; // rise into centre
-    // After folding it hovers just above the box mouth, then slides in.
-    const hoverY = MOUTH_Y + box.size.y * 0.55;
-    const pathY = restY + (hoverY - restY) * f + (INSIDE_Y - hoverY) * state.slide;
-    const pathX = sway * 0.6 * (1 - f);
+    const BELOW_Y = RISE_FROM; // fully out of frame beneath the viewport
 
-    // 0 .. 0.35 -> thobe fades out;  0.25 .. 0.7 -> folded piece fades in.
-    // The handover happens early so the large translucent thobe is never
-    // on screen at the same time as the (much smaller) box.
-    const outA = 1 - Math.min(1, f / 0.35);
-    const inA = Math.min(1, Math.max(0, (f - 0.25) / 0.45));
+    // 0 .. 0.55 -> thobe drops out of frame;  0.45 .. 1 -> folded piece rises back
+    const outT = smooth(f / 0.55);
+    const inT = smooth((f - 0.45) / 0.55);
 
-    dressGroup.position.set(pathX, pathY + float, 0);
-    dressGroup.scale.setScalar(1 - 0.12 * f);
-    dressGroup.rotation.y = state.rotate * (1 - f) + sway * 0.25 * (1 - f);
+    // Where the folded piece waits before it goes in, and where it ends up.
+    const hoverY = MOUTH_Y + folded.size.y * 0.62;
+    const slideT = smooth(state.slide);
+
+    // Only fade the thobe once it is already low in the frame, so the exit
+    // reads as movement rather than as a dissolve.
+    const outA = 1 - clamp01((outT - 0.6) / 0.4);
+    const inA = clamp01(inT / 0.3);
+
+    const dressY = restY + (BELOW_Y - restY) * outT;
+    const sway1 = sway * (1 - outT);
+
+    dressGroup.position.set(sway1 * 0.6, dressY + float * (1 - outT), 0);
+    dressGroup.scale.setScalar(1 - 0.06 * outT);
+    dressGroup.rotation.y = DRESS_FRONT_YAW + (state.rotate + sway * 0.25) * (1 - outT);
     dressGroup.rotation.x = 0;
     dressGroup.rotation.z = 0;
     dressGroup.visible = state.reveal > 0.001 && outA > 0.002;
     if (dressGroup.visible) setDressOpacity(outA);
 
-    foldGroup.position.set(pathX * 0.4, pathY + float * (1 - state.slide), 0);
-    foldGroup.scale.setScalar(0.86 + 0.14 * inA);
-    foldGroup.rotation.y = -0.42 + state.boxIn * 0.42 + sway * 0.12;
-    // Laid flat as it settles into the box, then hidden under the closing lid
-    // so it can never be seen poking through the packaging.
-    foldGroup.rotation.x = -0.05 * (1 - state.slide) - 1.45 * state.slide;
-    const foldA = inA * (1 - Math.min(1, state.close * 2.5));
+    // Rise from below the frame -> hover over the box -> down into the box, and
+    // at the same time back behind the box front so the logo panel stays clear.
+    const foldY = BELOW_Y + (hoverY - BELOW_Y) * inT + (INSIDE_Y - hoverY) * slideT;
+    const foldZ = -box.size.z * 0.42 * smooth((state.slide - 0.35) / 0.65);
+
+    foldGroup.position.set(0, foldY + float * (1 - slideT), foldZ);
+    foldGroup.scale.setScalar(1);
+    foldGroup.rotation.y = FOLD_FRONT_YAW + sway * 0.1 * (1 - slideT);
+    // Laid flat as it settles into the box footprint.
+    foldGroup.rotation.x = -(Math.PI / 2) * slideT;
+    foldGroup.rotation.z = 0;
+    // It is only faded out once it has travelled behind the box, and it is
+    // fully gone before the lid closes or the box is allowed to move.
+    const foldA = inA * (1 - clamp01((state.slide - 0.72) / 0.28));
     foldGroup.visible = foldA > 0.002;
     if (foldGroup.visible) setFoldOpacity(foldA);
 
@@ -354,9 +392,14 @@ export async function createStage({ canvas, viewport, onProgress }) {
     boxGroup.position.x = 0;
     boxGroup.scale.setScalar(0.86 + state.boxIn * 0.14);
     const open = Math.max(0, state.lid - state.close);
-    boxGroup.rotation.y = -0.42 + state.boxIn * 0.42 + sway * 0.12;
+    // The box is locked to its logo-facing angle for the whole entrance, the
+    // lid opening and the slide. It is only allowed to turn once the folded
+    // piece has gone behind it and faded out (i.e. once `close` starts).
+    boxGroup.rotation.y = BOX_FRONT_YAW;
     if (lidPivot) {
-      lidPivot.rotation.x = -open * 1.9;
+      // A shallower swing: the lid used to rock ~109 deg and tower over the
+      // box as a dark slab, hiding the logo panel while the piece went in.
+      lidPivot.rotation.x = -open * 0.6;
       boxGroup.rotation.x = 0;
     } else {
       // No identifiable lid: tilt the whole box open instead of doing nothing.
