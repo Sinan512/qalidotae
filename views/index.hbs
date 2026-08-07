@@ -1,9 +1,14 @@
 {{!--
-  Qalid landing page — one continuous scroll-driven story.
-  Scene order: opening logo -> hero dress -> showcase -> packaging -> collection -> contact -> footer
+  Qalid landing page — dark navy luxury Arabic atelier.
+  Scene order: opening logo → hero dress → showcase → packaging → thobe strip
+  → collection → thobe strip → contact → footer
+  Particle canvas sits fixed behind everything.
 --}}
 
-<!-- Loading state for the GLB assets (removed once models are ready) -->
+<!-- Lantern glow particles — fixed behind the whole page -->
+<canvas id="particleCanvas" aria-hidden="true"></canvas>
+
+<!-- Loading bar -->
 <div class="loader" id="loader" aria-hidden="true">
   <span class="loader__bar"><span class="loader__fill" id="loaderFill"></span></span>
 </div>
@@ -11,8 +16,6 @@
 <!-- ============================ NAVBAR ============================ -->
 <header class="nav" id="nav">
   <div class="nav__inner">
-    {{!-- The flying opening logo lands exactly on this slot (Scene 1), then the
-          real mark inside it takes over so it stays put on scroll/resize. --}}
     <div class="nav__logoSlot" id="navLogoSlot">
       <img src="/logo.png" alt="Qalid" class="nav__logo" id="navLogo" width="46" height="46" />
     </div>
@@ -39,19 +42,17 @@
   <span class="opening__hint" id="openingHint">Scroll</span>
 </section>
 
-<!-- ============ SCENES 2–4 — PINNED 3D STAGE (dress + box) ========= -->
+<!-- ============ SCENES 2–4 — PINNED 3D STAGE ========= -->
 <div class="stage" id="stage">
   <div class="stage__viewport" id="stageViewport">
     <canvas id="scene" class="stage__canvas"></canvas>
 
-    {{!-- Scene 2 caption --}}
     <div class="stage__hero" id="heroCopy">
       <p class="eyebrow">The Atelier</p>
       <h1 class="display">A thobe, <em>reimagined</em></h1>
       <p class="lede">Suspended in stillness. Cut for movement.</p>
     </div>
 
-    {{!-- Scene 3 copy blocks, revealed in sync with the rotation --}}
     <div class="stage__panels" id="showcase">
       <article class="panel" data-panel="0">
         <span class="panel__index">01</span>
@@ -75,7 +76,6 @@
       </article>
     </div>
 
-    {{!-- Scene 4 caption --}}
     <div class="stage__pack" id="packaging">
       <p class="eyebrow">Presentation</p>
       <h2 class="display">Folded, boxed, <em>yours</em></h2>
@@ -84,13 +84,30 @@
   </div>
 </div>
 
+<!-- ============ AMBIENT THOBE STRIP — between stage and collection ============ -->
+<div class="gold-divider" aria-hidden="true">
+  <span class="gold-divider__gem"></span>
+</div>
+
+<div class="thobe-strip" aria-hidden="true">
+  <canvas class="thobe-strip__canvas"></canvas>
+  <canvas class="thobe-strip__canvas"></canvas>
+  <canvas class="thobe-strip__canvas"></canvas>
+  <canvas class="thobe-strip__canvas"></canvas>
+  <canvas class="thobe-strip__canvas"></canvas>
+  <canvas class="thobe-strip__canvas"></canvas>
+</div>
+
+<div class="gold-divider" aria-hidden="true">
+  <span class="gold-divider__gem"></span>
+</div>
+
 <!-- ==================== SCENE 5 — COLLECTION ====================== -->
 <section class="collection" id="collection">
   <div class="collection__head">
     <p class="eyebrow">The Collection</p>
     <h2 class="display">Every piece, in sequence</h2>
   </div>
-  {{!-- The track drifts right to left on its own (see gallery.js) --}}
   <div class="collection__marquee" id="galleryMarquee">
     <div class="collection__track" id="galleryTrack">
       {{#each products}}
@@ -110,8 +127,25 @@
       {{/each}}
     </div>
   </div>
-
 </section>
+
+<!-- ============ AMBIENT THOBE STRIP — between collection and contact ============ -->
+<div class="gold-divider" aria-hidden="true">
+  <span class="gold-divider__gem"></span>
+</div>
+
+<div class="thobe-strip" aria-hidden="true">
+  <canvas class="thobe-strip__canvas"></canvas>
+  <canvas class="thobe-strip__canvas"></canvas>
+  <canvas class="thobe-strip__canvas"></canvas>
+  <canvas class="thobe-strip__canvas"></canvas>
+  <canvas class="thobe-strip__canvas"></canvas>
+  <canvas class="thobe-strip__canvas"></canvas>
+</div>
+
+<div class="gold-divider" aria-hidden="true">
+  <span class="gold-divider__gem"></span>
+</div>
 
 <!-- ====================== SCENE 6 — CONTACT ======================= -->
 <section class="contact" id="contact">

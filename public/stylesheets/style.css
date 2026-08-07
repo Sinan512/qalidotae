@@ -1,32 +1,39 @@
 /* ==========================================================================
-   Qalid — luxury design system
-   Blue/green gradient wash, black typography, subtle gray accents.
+   Qalid — Dark Navy Luxury Arabic Atelier
+   Midnight navy foundation, gold accents, lantern-glow atmosphere.
    ========================================================================== */
 
 :root {
-  --ink: #0d0f10;
-  --ink-soft: #4b5257;
-  --ink-faint: #9aa2a7;
-  --line: rgba(13, 15, 16, 0.08);
-  --panel: rgba(255, 255, 255, 0.72);
-  --shadow-soft: 0 18px 60px -30px rgba(13, 40, 45, 0.35);
-  --shadow-card: 0 30px 80px -40px rgba(13, 40, 45, 0.45);
-  --radius: 18px;
-  --radius-lg: 28px;
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --serif: "Cormorant Garamond", "Times New Roman", serif;
-  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --navy:        #080c18;
+  --navy-mid:    #0d1428;
+  --navy-light:  #111c35;
+  --gold:        #c9a96e;
+  --gold-bright: #e8c88a;
+  --gold-dim:    #7a5f35;
+  --ivory:       #f5f0e8;
+  --ivory-soft:  #d4c9b0;
+  --ink:         #f5f0e8;
+  --ink-soft:    #a89880;
+  --ink-faint:   #5a5040;
+  --line:        rgba(201,169,110,0.15);
+  --panel:       rgba(13,20,40,0.82);
+  --shadow-soft: 0 18px 60px -30px rgba(0,0,0,0.7);
+  --shadow-card: 0 30px 80px -40px rgba(0,0,0,0.8);
+  --shadow-gold: 0 0 40px rgba(201,169,110,0.2);
+  --radius:      18px;
+  --radius-lg:   28px;
+  --ease:        cubic-bezier(0.22,1,0.36,1);
+  --serif:       "Cormorant Garamond","Times New Roman",serif;
+  --sans:        "Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 
 *,
 *::before,
-*::after {
-  box-sizing: border-box;
-}
+*::after { box-sizing: border-box; }
 
 html {
   -webkit-text-size-adjust: 100%;
-  scroll-behavior: auto; /* GSAP owns the scroll feel */
+  scroll-behavior: auto;
 }
 
 body {
@@ -37,62 +44,74 @@ body {
   letter-spacing: 0.01em;
   line-height: 1.65;
   overflow-x: hidden;
-  /* Blue + green mixed gradient background, kept pale so type stays crisp */
+  background: var(--navy);
+}
+
+/* Rich layered background — stays fixed so it feels like an atelier wall */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
   background:
-    radial-gradient(120% 90% at 12% 0%, #eaf4f6 0%, rgba(234, 244, 246, 0) 58%),
-    radial-gradient(110% 80% at 92% 12%, #e6f2ec 0%, rgba(230, 242, 236, 0) 55%),
-    linear-gradient(168deg, #f4fafb 0%, #eef7f4 42%, #f7fbfa 100%);
-  background-attachment: fixed;
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(201,169,110,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 90%, rgba(100,80,160,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 50% at 50% 50%, #0d1428 0%, #080c18 100%);
+  pointer-events: none;
 }
 
-img {
-  display: block;
-  max-width: 100%;
-  height: auto;
+/* Arabesque/mashrabiya lattice overlay — extremely subtle gold grid */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    repeating-linear-gradient(0deg,   transparent, transparent 59px, rgba(201,169,110,0.03) 60px),
+    repeating-linear-gradient(90deg,  transparent, transparent 59px, rgba(201,169,110,0.03) 60px);
+  pointer-events: none;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* Everything inside must sit above the fixed bg layers */
+header, main, section, footer, .stage, .loader, .opening, .collection, .contact {
+  position: relative;
+  z-index: 1;
 }
 
-button {
-  font: inherit;
-  color: inherit;
-  border: 0;
-  background: none;
-  cursor: pointer;
-}
+img  { display: block; max-width: 100%; height: auto; }
+a    { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
 
 /* ------------------------------ typography ------------------------------ */
 
 .display {
   font-family: var(--serif);
   font-weight: 300;
-  font-size: clamp(2.1rem, 5.4vw, 4.4rem);
+  font-size: clamp(2.1rem,5.4vw,4.4rem);
   line-height: 1.06;
   letter-spacing: -0.015em;
   margin: 0.2em 0 0.4em;
+  color: var(--ivory);
 }
 
 .display em {
   font-style: italic;
-  color: var(--ink-soft);
+  color: var(--gold);
 }
 
 .eyebrow {
   margin: 0;
   font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.34em;
-  color: var(--ink-faint);
+  letter-spacing: 0.38em;
+  color: var(--gold);
 }
 
 .lede {
   margin: 0;
   max-width: 32ch;
   color: var(--ink-soft);
-  font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+  font-size: clamp(0.95rem,1.4vw,1.05rem);
 }
 
 /* -------------------------------- loader -------------------------------- */
@@ -107,15 +126,12 @@ button {
   transition: opacity 0.8s var(--ease);
 }
 
-.loader.is-done {
-  opacity: 0;
-  pointer-events: none;
-}
+.loader.is-done { opacity: 0; pointer-events: none; }
 
 .loader__bar {
   width: 120px;
   height: 1px;
-  background: var(--line);
+  background: rgba(201,169,110,0.2);
   overflow: hidden;
 }
 
@@ -123,7 +139,7 @@ button {
   display: block;
   height: 100%;
   width: 0%;
-  background: var(--ink);
+  background: var(--gold);
   transition: width 0.35s var(--ease);
 }
 
@@ -131,32 +147,26 @@ button {
 
 .nav {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   z-index: 50;
-  backdrop-filter: saturate(140%) blur(14px);
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.4));
+  backdrop-filter: saturate(140%) blur(18px);
+  background: linear-gradient(to bottom, rgba(8,12,24,0.9), rgba(8,12,24,0.6));
   border-bottom: 1px solid transparent;
   transition: border-color 0.6s var(--ease), box-shadow 0.6s var(--ease);
   opacity: 0;
   pointer-events: none;
 }
 
-.nav.is-active {
-  opacity: 1;
-  pointer-events: auto;
-}
+.nav.is-active  { opacity: 1; pointer-events: auto; }
 
 .nav.is-stuck {
   border-bottom-color: var(--line);
-  box-shadow: 0 12px 40px -32px rgba(13, 40, 45, 0.6);
+  box-shadow: 0 12px 40px -20px rgba(0,0,0,0.8), 0 0 0 1px rgba(201,169,110,0.05);
 }
 
-/* Flush left/right row — the logo slot sits on the header's true left edge */
 .nav__inner {
   width: 100%;
-  padding: clamp(10px, 1.6vw, 16px) clamp(16px, 4vw, 44px);
+  padding: clamp(10px,1.6vw,16px) clamp(16px,4vw,44px);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -165,13 +175,12 @@ button {
 
 .nav__logoSlot {
   position: relative;
-  width: clamp(34px, 4.4vw, 46px);
-  height: clamp(34px, 4.4vw, 46px);
+  width: clamp(34px,4.4vw,46px);
+  height: clamp(34px,4.4vw,46px);
   flex: 0 0 auto;
-  margin-right: auto; /* keeps the mark hard-left at any width */
+  margin-right: auto;
 }
 
-/* The real navbar mark: revealed the moment the flying logo lands. */
 .nav__logo {
   position: absolute;
   inset: 0;
@@ -180,24 +189,23 @@ button {
   object-fit: contain;
   opacity: 0;
   transition: opacity 0.3s var(--ease);
+  filter: brightness(1.3);
 }
 
-.nav.is-landed .nav__logo {
-  opacity: 1;
-}
+.nav.is-landed .nav__logo { opacity: 1; }
 
 .nav__links {
   display: flex;
-  gap: clamp(12px, 2.6vw, 34px);
-  font-size: clamp(0.66rem, 1.2vw, 0.78rem);
-  letter-spacing: 0.14em;
+  gap: clamp(12px,2.6vw,34px);
+  font-size: clamp(0.66rem,1.2vw,0.78rem);
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   opacity: 0;
 }
 
 .nav__links a {
   position: relative;
-  color: var(--ink-soft);
+  color: var(--ivory-soft);
   padding-bottom: 3px;
   transition: color 0.4s var(--ease);
 }
@@ -205,24 +213,16 @@ button {
 .nav__links a::after {
   content: "";
   position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 1px;
-  background: currentColor;
+  left: 0; bottom: 0;
+  width: 100%; height: 1px;
+  background: var(--gold);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.5s var(--ease);
 }
 
-.nav__links a:hover {
-  color: var(--ink);
-}
-
-.nav__links a:hover::after {
-  transform: scaleX(1);
-  transform-origin: left;
-}
+.nav__links a:hover { color: var(--gold); }
+.nav__links a:hover::after { transform: scaleX(1); transform-origin: left; }
 
 /* ---------------------------- scene 1: opening --------------------------- */
 
@@ -231,46 +231,41 @@ button {
   height: 100svh;
   display: grid;
   place-items: center;
+  z-index: 1;
 }
 
-/* The flying mark is fixed, so its untransformed box never moves while the page
-   scrolls — that's what lets the FLIP land exactly on the navbar slot.
-   Centring uses the separate `translate` property so GSAP owns `transform`. */
 .opening__logo {
   position: fixed;
-  left: 50%;
-  top: 50%;
+  left: 50%; top: 50%;
   translate: -50% -50%;
   transform-origin: 0 0;
-  width: clamp(130px, 18vw, 240px);
+  width: clamp(130px,18vw,240px);
   height: auto;
   opacity: 0;
   z-index: 55;
   pointer-events: none;
   will-change: transform, opacity;
+  filter: drop-shadow(0 0 40px rgba(201,169,110,0.4));
 }
 
-/* Once it has landed, the navbar copy takes over and this one steps aside. */
-.opening__logo.is-parked {
-  opacity: 0 !important;
-}
+.opening__logo.is-parked { opacity: 0 !important; }
 
 .opening__hint {
   position: absolute;
   bottom: 34px;
   font-size: 0.62rem;
-  letter-spacing: 0.4em;
+  letter-spacing: 0.44em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--gold-dim);
   opacity: 0;
 }
 
 /* -------------------- scenes 2–4: pinned 3D stage ----------------------- */
 
 .stage {
-  /* Tall scroll runway; the viewport inside is pinned by ScrollTrigger */
-  height: 620svh;
+  height: 660svh;
   position: relative;
+  z-index: 1;
 }
 
 .stage__viewport {
@@ -280,67 +275,77 @@ button {
   overflow: hidden;
 }
 
+/* Gold vignette frame around the 3D viewport */
+.stage__viewport::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 55%, rgba(8,12,24,0.7) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
 .stage__canvas {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   display: block;
 }
 
 .stage__hero,
 .stage__pack {
   position: absolute;
-  left: clamp(20px, 6vw, 90px);
+  left: clamp(20px,6vw,90px);
   top: 50%;
   transform: translateY(-50%);
-  max-width: min(420px, 46vw);
+  max-width: min(420px,46vw);
   opacity: 0;
   pointer-events: none;
+  z-index: 3;
 }
 
 .stage__pack {
   left: auto;
-  right: clamp(20px, 6vw, 90px);
+  right: clamp(20px,6vw,90px);
   text-align: right;
 }
 
-.stage__pack .lede {
-  margin-left: auto;
-}
+.stage__pack .lede { margin-left: auto; }
 
 .stage__panels {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 3;
 }
 
 .panel {
   position: absolute;
   top: 50%;
-  right: clamp(20px, 7vw, 110px);
+  right: clamp(20px,7vw,110px);
   transform: translateY(-50%);
-  width: min(340px, 42vw);
+  width: min(340px,42vw);
   padding: 26px 28px;
   border-radius: var(--radius-lg);
-  background: var(--panel);
+  background: rgba(8,12,24,0.75);
   border: 1px solid var(--line);
-  box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(201,169,110,0.08);
+  backdrop-filter: blur(12px);
   opacity: 0;
 }
 
 .panel__index {
   font-size: 0.62rem;
-  letter-spacing: 0.34em;
-  color: var(--ink-faint);
+  letter-spacing: 0.38em;
+  color: var(--gold);
 }
 
 .panel h2 {
   font-family: var(--serif);
   font-weight: 400;
-  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+  font-size: clamp(1.35rem,2.4vw,1.9rem);
   margin: 8px 0 10px;
+  color: var(--ivory);
 }
 
 .panel p {
@@ -353,55 +358,56 @@ button {
 
 .collection {
   position: relative;
-  padding: clamp(70px, 10vw, 140px) 0 0;
+  padding: clamp(70px,10vw,140px) 0 0;
+  z-index: 1;
 }
 
 .collection__head {
   max-width: 1320px;
   margin: 0 auto;
-  padding: 0 clamp(20px, 6vw, 90px) clamp(30px, 5vw, 60px);
+  padding: 0 clamp(20px,6vw,90px) clamp(30px,5vw,60px);
 }
 
-.collection__head .display {
-  font-size: clamp(1.9rem, 4vw, 3.2rem);
-}
+.collection__head .display { font-size: clamp(1.9rem,4vw,3.2rem); }
 
-/* Marquee viewport: clips the endlessly drifting track. */
-.collection__marquee {
-  overflow: hidden;
-}
+.collection__marquee { overflow: hidden; }
 
 .collection__track {
   display: flex;
-  gap: clamp(20px, 3vw, 46px);
-  padding: 12px clamp(20px, 3vw, 46px) 26px;
+  gap: clamp(20px,3vw,46px);
+  padding: 12px clamp(20px,3vw,46px) 26px;
   width: max-content;
   will-change: transform;
 }
 
-/* Cards keep a fixed presentation while the row moves on its own. */
-.collection.is-marquee .card {
-  transform: none;
-}
-
+.collection.is-marquee .card { transform: none; }
 
 .card {
   flex: 0 0 auto;
-  width: clamp(230px, 30vw, 380px);
+  width: clamp(230px,30vw,380px);
   margin: 0;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(13,20,40,0.8);
   border: 1px solid var(--line);
   box-shadow: var(--shadow-card);
   transform: scale(0.94);
   will-change: transform;
+  cursor: pointer;
+  transition: transform 0.45s var(--ease), box-shadow 0.45s var(--ease), border-color 0.45s var(--ease);
+}
+
+.card:hover {
+  transform: scale(0.97) translateY(-6px) !important;
+  box-shadow: var(--shadow-gold), var(--shadow-card);
+  border-color: rgba(201,169,110,0.35);
 }
 
 .card img {
   width: 100%;
   aspect-ratio: 3 / 4;
   object-fit: cover;
+  display: block;
 }
 
 .card figcaption {
@@ -409,12 +415,169 @@ button {
   font-size: 0.7rem;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--gold-dim);
 }
 
 .collection__empty {
-  padding: 40px clamp(20px, 6vw, 90px);
+  padding: 40px clamp(20px,6vw,90px);
   color: var(--ink-faint);
+}
+
+/* ======================== LIGHTBOX ======================== */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4,7,15,0.96);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s var(--ease);
+  backdrop-filter: blur(12px);
+}
+
+.lightbox.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lightbox__img {
+  max-width: min(90vw, 520px);
+  max-height: 88svh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--radius);
+  box-shadow: 0 40px 120px rgba(0,0,0,0.9), 0 0 0 1px rgba(201,169,110,0.15);
+  display: block;
+}
+
+.lightbox__close {
+  position: absolute;
+  top: 28px; right: 32px;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgba(13,20,40,0.8);
+  color: var(--ivory-soft);
+  font-size: 1.4rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.lightbox__close:hover {
+  background: rgba(201,169,110,0.15);
+  color: var(--gold);
+  border-color: rgba(201,169,110,0.4);
+}
+
+.lightbox__prev,
+.lightbox__next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgba(13,20,40,0.8);
+  color: var(--ivory-soft);
+  font-size: 1.2rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.lightbox__prev { left: 24px; }
+.lightbox__next { right: 24px; }
+
+.lightbox__prev:hover,
+.lightbox__next:hover {
+  background: rgba(201,169,110,0.15);
+  color: var(--gold);
+  border-color: rgba(201,169,110,0.4);
+}
+
+.lightbox__caption {
+  position: absolute;
+  bottom: 28px;
+  font-size: 0.68rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+}
+
+/* ======================== AMBIENT THOBE CANVASES ======================== */
+
+.thobe-ambient {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.12;
+  filter: blur(0px);
+  will-change: transform;
+}
+
+.thobe-ambient canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+/* Floating thobe strip between sections */
+.thobe-strip {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 0;
+  pointer-events: none;
+}
+
+.thobe-strip__canvas {
+  flex: 0 0 auto;
+  opacity: 0.18;
+  width: 140px;
+  height: 200px;
+  display: block;
+}
+
+/* Gold divider line with ornament */
+.gold-divider {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 clamp(20px,6vw,90px);
+  max-width: 1320px;
+  margin: 0 auto;
+  opacity: 0.5;
+}
+
+.gold-divider::before,
+.gold-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
+}
+
+.gold-divider__gem {
+  width: 8px; height: 8px;
+  border: 1px solid var(--gold-dim);
+  border-radius: 2px;
+  transform: rotate(45deg);
+  background: transparent;
+  flex: 0 0 auto;
 }
 
 /* ---------------------------- scene 6: contact --------------------------- */
@@ -422,17 +585,17 @@ button {
 .contact {
   max-width: 1320px;
   margin: 0 auto;
-  padding: clamp(90px, 14vw, 190px) clamp(20px, 6vw, 90px);
+  padding: clamp(90px,14vw,190px) clamp(20px,6vw,90px);
   text-align: center;
+  z-index: 1;
+  position: relative;
 }
 
-.contact .lede {
-  margin: 0 auto;
-}
+.contact .lede { margin: 0 auto; }
 
 .contact__list {
   list-style: none;
-  margin: clamp(34px, 6vw, 64px) auto;
+  margin: clamp(34px,6vw,64px) auto;
   padding: 0;
   display: grid;
   gap: 14px;
@@ -446,28 +609,29 @@ button {
   gap: 18px;
   padding: 20px 26px;
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.66);
+  background: rgba(13,20,40,0.7);
   border: 1px solid var(--line);
-  transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease),
-    background-color 0.5s var(--ease);
+  transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease), background-color 0.5s var(--ease), border-color 0.5s var(--ease);
 }
 
 .contact__list a:hover {
   transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: var(--shadow-soft);
+  background: rgba(20,30,55,0.9);
+  box-shadow: var(--shadow-gold);
+  border-color: rgba(201,169,110,0.3);
 }
 
 .contact__label {
   font-size: 0.66rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--gold-dim);
 }
 
 .contact__value {
   font-family: var(--serif);
   font-size: 1.15rem;
+  color: var(--ivory-soft);
 }
 
 .btn {
@@ -476,9 +640,10 @@ button {
   gap: 12px;
   padding: 17px 42px;
   border-radius: 999px;
-  background: var(--ink);
-  color: #fff;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+  color: var(--navy);
   font-size: 0.74rem;
+  font-weight: 500;
   letter-spacing: 0.24em;
   text-transform: uppercase;
   transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease), opacity 0.4s var(--ease);
@@ -486,20 +651,22 @@ button {
 
 .btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 24px 50px -26px rgba(13, 40, 45, 0.8);
+  box-shadow: 0 24px 50px -14px rgba(201,169,110,0.5);
 }
 
 /* ---------------------------- scene 7: footer ---------------------------- */
 
 .footer {
   border-top: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(4,7,15,0.6);
+  position: relative;
+  z-index: 1;
 }
 
 .footer__inner {
   max-width: 1320px;
   margin: 0 auto;
-  padding: clamp(40px, 6vw, 74px) clamp(20px, 6vw, 90px);
+  padding: clamp(40px,6vw,74px) clamp(20px,6vw,90px);
   display: grid;
   justify-items: center;
   gap: 22px;
@@ -508,54 +675,44 @@ button {
 
 .footer__logo {
   width: 62px;
-  opacity: 0.85;
+  opacity: 0.7;
+  filter: brightness(1.4);
 }
 
 .footer__nav {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: clamp(14px, 3vw, 32px);
+  gap: clamp(14px,3vw,32px);
   font-size: 0.72rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
 
-.footer__nav a {
-  transition: color 0.4s var(--ease);
-}
+.footer__nav a { transition: color 0.4s var(--ease); }
+.footer__nav a:hover { color: var(--gold); }
 
-.footer__nav a:hover {
-  color: var(--ink);
-}
-
-.footer__social {
-  display: flex;
-  gap: 14px;
-}
+.footer__social { display: flex; gap: 14px; }
 
 .footer__social a {
-  width: 40px;
-  height: 40px;
+  width: 40px; height: 40px;
   display: grid;
   place-items: center;
   border-radius: 999px;
   border: 1px solid var(--line);
   color: var(--ink-soft);
-  transition: transform 0.45s var(--ease), color 0.45s var(--ease),
-    border-color 0.45s var(--ease);
+  transition: transform 0.45s var(--ease), color 0.45s var(--ease), border-color 0.45s var(--ease), box-shadow 0.45s var(--ease);
 }
 
 .footer__social a:hover {
   transform: translateY(-2px);
-  color: var(--ink);
-  border-color: rgba(13, 15, 16, 0.22);
+  color: var(--gold);
+  border-color: rgba(201,169,110,0.35);
+  box-shadow: 0 0 20px rgba(201,169,110,0.15);
 }
 
-.footer__social svg {
-  fill: currentColor;
-}
+.footer__social svg { fill: currentColor; }
 
 .footer__copy {
   margin: 0;
@@ -574,8 +731,8 @@ button {
 }
 
 .footer__top:hover {
-  color: var(--ink);
-  border-color: rgba(13, 15, 16, 0.3);
+  color: var(--gold);
+  border-color: rgba(201,169,110,0.3);
 }
 
 /* ------------------------------ reveal state ---------------------------- */
@@ -585,93 +742,77 @@ button {
   transform: translateY(18px);
 }
 
+/* ======================== PARTICLE CANVAS ======================== */
+
+#particleCanvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
+
 /* ------------------------------ tablet (<=1024) -------------------------- */
 
 @media (max-width: 1024px) {
-  .stage {
-    height: 600svh;
-  }
+  .stage { height: 640svh; }
 
   .stage__hero,
-  .stage__pack {
-    max-width: min(360px, 44vw);
-  }
+  .stage__pack { max-width: min(360px,44vw); }
 
-  .panel {
-    width: min(320px, 46vw);
-    padding: 22px 24px;
-  }
+  .panel { width: min(320px,46vw); padding: 22px 24px; }
 
-  .card {
-    width: clamp(240px, 42vw, 330px);
-  }
+  .card { width: clamp(240px,42vw,330px); }
+
+  .lightbox__prev { left: 10px; }
+  .lightbox__next { right: 10px; }
 }
 
 /* ------------------------------ phone (<=700) ---------------------------- */
 
 @media (max-width: 700px) {
-  .stage {
-    height: 520svh;
-  }
+  .stage { height: 560svh; }
 
-  /* Lift the 3D subject so the copy below never covers it — kept shallow so
-     the top of the garment is never cropped. */
-  .stage__canvas {
-    transform: translateY(-4%);
-  }
+  .stage__canvas { transform: translateY(-4%); }
 
   .stage__hero,
   .stage__pack {
-    top: auto;
-    bottom: 6svh;
-    left: 18px;
-    right: 18px;
+    top: auto; bottom: 6svh;
+    left: 18px; right: 18px;
     max-width: none;
     transform: none;
     text-align: left;
   }
 
   .stage__hero .lede,
-  .stage__pack .lede {
-    margin-left: 0;
-    max-width: none;
-  }
+  .stage__pack .lede { margin-left: 0; max-width: none; }
 
   .panel {
-    top: auto;
-    bottom: 6svh;
-    left: 16px;
-    right: 16px;
-    width: auto;
-    transform: none;
+    top: auto; bottom: 6svh;
+    left: 16px; right: 16px;
+    width: auto; transform: none;
     padding: 18px 20px;
   }
 
-  .panel p {
-    font-size: 0.88rem;
-  }
+  .panel p { font-size: 0.88rem; }
 
-  .collection__track {
-    padding-inline: 16px;
-  }
+  .collection__track { padding-inline: 16px; }
 
-  .card {
-    width: 78vw;
-  }
+  .card { width: 78vw; }
 
-  .contact__list a {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
+  .contact__list a { flex-direction: column; align-items: flex-start; gap: 6px; }
 
-  .btn {
-    padding: 15px 32px;
-  }
+  .btn { padding: 15px 32px; }
+
+  .lightbox__img { max-width: 96vw; }
+  .lightbox__prev { left: 6px; }
+  .lightbox__next { right: 6px; }
+
+  .thobe-strip { height: 150px; }
+  .thobe-strip__canvas { width: 90px; height: 130px; }
 }
 
-/* Phones (and reduced motion) swipe the collection natively instead of
-   scrubbing a pinned horizontal timeline. */
 .collection.is-swipe .collection__track {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
@@ -680,25 +821,17 @@ button {
   transform: none !important;
 }
 
-.collection.is-swipe .collection__track::-webkit-scrollbar {
-  display: none;
-}
+.collection.is-swipe .collection__track::-webkit-scrollbar { display: none; }
 
 .collection.is-swipe .card {
   scroll-snap-align: center;
   transform: none !important;
 }
 
-/* ------------------------- reduced motion fallback ---------------------- */
-
+/* reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .opening__logo,
-  .nav,
-  .nav__links,
-  .stage__hero,
-  .stage__pack,
-  .panel,
-  .reveal {
+  .opening__logo, .nav, .nav__links,
+  .stage__hero, .stage__pack, .panel, .reveal {
     opacity: 1 !important;
     transform: none !important;
   }

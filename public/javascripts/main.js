@@ -1,17 +1,12 @@
 /* ==========================================================================
    main.js — orchestration
-   Scene 1 (logo -> navbar), Scenes 2–4 (pinned 3D story), Scene 5 (gallery),
-   Scenes 6–7 (contact + footer). One ScrollTrigger timeline per scene; no
-   ad-hoc scroll listeners anywhere.
+   Scenes 1-7 + lantern particle system + ambient thobe strip management.
    ========================================================================== */
 
 import { initGallery } from "/javascripts/gallery.js";
 
-/* ---------------------------------------------------------------------------
-   CONTACT CONFIG — placeholder data, swap these three values for the real ones
-   --------------------------------------------------------------------------- */
 const CONTACT = {
-  whatsapp: "+917558056808", // digits only for the wa.me link
+  whatsapp: "+917558056808",
   whatsappDisplay: "+917558056808",
   email: "qalidot7@gmail.com",
   instagram: "qalidot.ae",
@@ -27,15 +22,10 @@ const $ = (sel) => document.querySelector(sel);
 function wireContact() {
   const wa = "https://wa.me/" + CONTACT.whatsapp.replace(/[^\d]/g, "");
   document.querySelectorAll("[data-wa-link]").forEach((el) => (el.href = wa));
-  document
-    .querySelectorAll("[data-mail-link]")
-    .forEach((el) => (el.href = "mailto:" + CONTACT.email));
-  document
-    .querySelectorAll("[data-ig-link]")
-    .forEach((el) => (el.href = "https://instagram.com/" + CONTACT.instagram));
+  document.querySelectorAll("[data-mail-link]").forEach((el) => (el.href = "mailto:" + CONTACT.email));
+  document.querySelectorAll("[data-ig-link]").forEach((el) => (el.href = "https://instagram.com/" + CONTACT.instagram));
 
-  const set = (sel, value) =>
-    document.querySelectorAll(sel).forEach((el) => (el.textContent = value));
+  const set = (sel, value) => document.querySelectorAll(sel).forEach((el) => (el.textContent = value));
   set("[data-wa-display]", CONTACT.whatsappDisplay);
   set("[data-mail-display]", CONTACT.email);
   set("[data-ig-display]", "@" + CONTACT.instagram);
@@ -44,27 +34,111 @@ function wireContact() {
   if (year) year.textContent = new Date().getFullYear();
 }
 
-/* ----------------------- Scene 1: logo into the navbar -------------------
-   The flying mark is `position: fixed`, so its untransformed box never moves
-   while the page scrolls. That makes a true FLIP possible: we measure the
-   start box and the navbar slot once per ScrollTrigger refresh and animate
-   from `transform-origin: 0 0`, so the mark lands exactly on the slot at every
-   viewport width. Once it has landed, the real navbar logo takes over.
-   ------------------------------------------------------------------------ */
-function initOpening() {
-  const logo = $("#heroLogo");
-  const slot = $("#navLogoSlot");
-  const nav = $("#nav");
-  const links = $("#navLinks");
-  const hint = $("#openingHint");
+/* ======================== LANTERN PARTICLE SYSTEM ========================
+   Warm amber/gold glowing orbs float upward like lantern light,
+   creating the atmosphere of an Arabic atelier / souk at night.
+   ========================================================================= */
+function initParticles() {
+  if (reduceMotion) return;
 
-  // Slow, calm fade-in of the mark on a plain background.
+  const canvas = document.getElementById("particleCanvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener("resize", resize, { passive: true });
+
+  class Particle {
+    constructor() { this.reset(true); }
+
+    reset(initial = false) {
+      this.x    = Math.random() * window.innerWidth;
+      this.y    = initial ? Math.random() * window.innerHeight : window.innerHeight + 10;
+      this.vy   = -(0.35 + Math.random() * 0.9);   // upward
+      this.vx   = (Math.random() - 0.5) * 0.3;     // gentle drift
+      this.size = 1.5 + Math.random() * 3.5;
+      this.life = 0;
+      this.maxLife = 220 + Math.random() * 280;
+      // Warm gold → amber → pale ivory colour range
+      const hue  = 36 + Math.random() * 28;         // 36–64 deg (gold band)
+      const sat  = 70 + Math.random() * 30;
+      const lum  = 65 + Math.random() * 25;
+      this.color = `hsl(${hue},${sat}%,${lum}%)`;
+      this.wave  = Math.random() * Math.PI * 2;     // sine wave offset
+    }
+
+    update() {
+      this.life++;
+      this.y += this.vy;
+      this.x += this.vx + Math.sin(this.life * 0.045 + this.wave) * 0.28;
+      if (this.life > this.maxLife || this.y < -20) this.reset();
+    }
+
+    draw() {
+      const prog  = this.life / this.maxLife;
+      // fade in for first 15%, full for middle, fade out for last 20%
+      const alpha = prog < 0.15
+        ? prog / 0.15
+        : prog > 0.8
+          ? (1 - prog) / 0.2
+          : 1;
+
+      ctx.save();
+      ctx.globalAlpha = alpha * 0.55;
+
+      // Soft glow halo
+      const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 3.5);
+      grd.addColorStop(0,   this.color);
+      grd.addColorStop(0.4, this.color.replace("hsl", "hsla").replace(")", `,${0.4})`).replace("hsla(", "hsl("));
+      grd.addColorStop(1,   "transparent");
+
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size * 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Bright core
+      ctx.globalAlpha = alpha * 0.85;
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size * 0.65, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+  }
+
+  // More particles for a richer atelier atmosphere
+  const COUNT = isPhone() ? 55 : 90;
+  const particles = Array.from({ length: COUNT }, () => new Particle());
+
+  let rafId;
+  function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach((p) => { p.update(); p.draw(); });
+    rafId = requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+/* ======================== OPENING SCENE ======================== */
+function initOpening() {
+  const logo  = $("#heroLogo");
+  const slot  = $("#navLogoSlot");
+  const nav   = $("#nav");
+  const links = $("#navLinks");
+  const hint  = $("#openingHint");
+
   gsap.to(logo, { opacity: 1, duration: 1.8, ease: "power2.out", delay: 0.25 });
-  gsap.to(hint, { opacity: 1, duration: 1.2, delay: 1.6, ease: "power2.out" });
+  gsap.to(hint, { opacity: 1, duration: 1.2, delay: 1.6,  ease: "power2.out" });
 
   const park = (parked) => {
-    logo.classList.toggle("is-parked", parked); // hides the flying copy
-    nav.classList.toggle("is-landed", parked); // reveals the navbar copy
+    logo.classList.toggle("is-parked", parked);
+    nav.classList.toggle("is-landed", parked);
   };
 
   if (reduceMotion) {
@@ -74,7 +148,6 @@ function initOpening() {
     return;
   }
 
-  // FLIP measurement, cached per refresh so scrubbing stays cheap and stable.
   const flip = { x: 0, y: 0, scale: 1 };
   function measure() {
     const prev = logo.style.transform;
@@ -82,9 +155,8 @@ function initOpening() {
     const a = logo.getBoundingClientRect();
     const b = slot.getBoundingClientRect();
     logo.style.transform = prev;
-
-    flip.x = b.left - a.left;
-    flip.y = b.top - a.top;
+    flip.x     = b.left - a.left;
+    flip.y     = b.top  - a.top;
     flip.scale = a.width ? b.width / a.width : 1;
   }
   measure();
@@ -95,57 +167,42 @@ function initOpening() {
       trigger: "#opening",
       start: "top top",
       end: "bottom top",
-      scrub: 1, // scrubbed with smoothing = no sudden jumps
+      scrub: 1,
       invalidateOnRefresh: true,
-      onEnter: () => nav.classList.add("is-active"),
-      onLeaveBack: () => {
-        nav.classList.remove("is-active");
-        park(false);
-      },
-      onLeave: () => park(true),
+      onEnter:     () => nav.classList.add("is-active"),
+      onLeaveBack: () => { nav.classList.remove("is-active"); park(false); },
+      onLeave:     () => park(true),
       onEnterBack: () => park(false),
     },
   });
 
-  tl.to(hint, { opacity: 0, duration: 0.1 }, 0).to(
-    logo,
-    {
-      x: () => flip.x,
-      y: () => flip.y,
-      scale: () => flip.scale,
-      ease: "power2.inOut",
-      duration: 1,
-    },
-    0
-  );
+  tl.to(hint, { opacity: 0, duration: 0.1 }, 0)
+    .to(logo, {
+      x: () => flip.x, y: () => flip.y, scale: () => flip.scale,
+      ease: "power2.inOut", duration: 1,
+    }, 0)
+    .fromTo(links,
+      { opacity: 0, x: 26 },
+      { opacity: 1, x: 0, ease: "power2.out", duration: 0.35 },
+      0.62
+    );
 
-  // Nav links drift in from the right as the mark lands.
-  tl.fromTo(
-    links,
-    { opacity: 0, x: 26 },
-    { opacity: 1, x: 0, ease: "power2.out", duration: 0.35 },
-    0.62
-  );
-
-  // Sticky bar gains its soft shadow only once it's actually holding content.
   ScrollTrigger.create({
-    start: "top -60",
-    end: 99999,
+    start: "top -60", end: 99999,
     onToggle: (self) => nav.classList.toggle("is-stuck", self.isActive),
   });
 }
 
-/* ----------------- Scenes 2–4: one pinned, scrubbed timeline --------------
-   Beat map (timeline seconds):
-     0.0–2.0  rise + camera dolly + hero copy
-     2.1–6.7  rotate ~150° out and back, four copy panels keyed to it
-     6.9–13   fold, box enters, lid opens, piece slides in, lid closes
-   ------------------------------------------------------------------------ */
+/* ======================== 3D STORY SCENES 2–4 ========================
+   Beat map:
+     0.0–2.0   rise + camera dolly + hero copy
+     2.1–6.7   rotate ~150° and back, four panels
+     6.9–14.5  fold → box rises → lid LIFTS UP → dress lowers in → lid closes
+   ==================================================================== */
 function initStory(stage) {
   const { state } = stage;
   const panels = gsap.utils.toArray(".panel");
-  // ~150° out and back — deliberately never a full spin. Narrower on phones.
-  const SWEEP = (stage.isPhone ? 115 : 150) * (Math.PI / 180);
+  const SWEEP  = (stage.isPhone ? 115 : 150) * (Math.PI / 180);
 
   const tl = gsap.timeline({
     defaults: { ease: "power2.inOut" },
@@ -161,67 +218,72 @@ function initStory(stage) {
     },
   });
 
-  /* Scene 2 — the piece rises and the camera moves in */
+  /* Scene 2 — rise + dolly */
   tl.to(state, { reveal: 1, duration: 1.4, ease: "power3.out" }, 0)
     .to(state, { zoom: 1, duration: 2.4, ease: "none" }, 0.2)
     .to("#heroCopy", { opacity: 1, duration: 0.7, ease: "power2.out" }, 0.5)
     .to("#heroCopy", { opacity: 0, duration: 0.5 }, 1.9);
 
-  /* Scene 3 — rotate ~150°, then back to a guaranteed front view */
+  /* Scene 3 — rotate + panels */
   tl.to(state, { rotate: SWEEP, duration: 2.4, ease: "power1.inOut" }, 2.1);
-  tl.to(state, { rotate: 0, duration: 2.0, ease: "power1.inOut" }, 4.7);
+  tl.to(state, { rotate: 0,     duration: 2.0, ease: "power1.inOut" }, 4.7);
 
   panels.forEach((panel, i) => {
     const at = 2.3 + i * 1.05;
-    tl.fromTo(
-      panel,
+    tl.fromTo(panel,
       { opacity: 0, y: 26 },
       { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" },
       at
     ).to(panel, { opacity: 0, y: -20, duration: 0.45 }, at + 0.75);
   });
 
-  /* Scene 4 — fold, box opens, piece slides in, lid closes */
+  /* Scene 4 — fold → box → lid lifts → dress into box → lid closes
+     ---------------------------------------------------------------
+     7.1  thobe begins folding (exits down, folded rises)
+     8.2  box rises into frame
+     8.8  lid begins lifting upward (gift-box style)
+     9.6  lid fully open — dress hovers above open box
+    10.4  dress slides straight down into box
+    11.8  dress faded out, fully inside box
+    12.2  lid starts closing
+    13.4  lid closed — branded box faces camera
+    14.2  packaging copy fades
+  */
   tl.to("#packaging", { opacity: 1, duration: 0.6, ease: "power2.out" }, 6.9)
-    .to(state, { pack: 1, duration: 1.4, ease: "power2.inOut" }, 6.9)
-    // two-beat fold so it reads as cloth, not one squash
+    .to(state, { pack: 1,   duration: 1.4, ease: "power2.inOut" }, 6.9)
     .to(state, { fold: 0.45, duration: 0.9, ease: "power2.inOut" }, 7.1)
-    .to(state, { boxIn: 1, duration: 1.0, ease: "power3.out" }, 8.0)
-    .to(state, { fold: 1, duration: 1.0, ease: "power2.inOut" }, 8.1)
-    // The box now stays SHUT and logo-forward while the piece goes in behind
-    // it, so the branded panel is the only thing facing the camera.
-    // slide behind the measured box
-    .to(state, { slide: 1, duration: 1.2, ease: "power2.inOut" }, 9.7)
-    // the lid only closes once the piece is fully inside and faded out
-    .to(state, { close: 1, duration: 1.1, ease: "power2.inOut" }, 11.2)
-    // brief hold on the closed, branded box
-    .to({}, { duration: 0.9 }, 12.3)
-    .to("#packaging", { opacity: 0, duration: 0.5 }, 12.7);
+    .to(state, { boxIn: 1,  duration: 1.0, ease: "power3.out"  }, 8.2)
+    .to(state, { fold: 1,   duration: 1.0, ease: "power2.inOut" }, 8.3)
+    // Lid lifts upward — slow, deliberate gift-box reveal
+    .to(state, { lid: 1,    duration: 1.6, ease: "power1.inOut" }, 8.8)
+    // Once lid is up, folded dress descends straight into the open box
+    .to(state, { slide: 1,  duration: 1.5, ease: "power2.inOut" }, 10.4)
+    // Lid closes gently after dress is settled inside
+    .to(state, { close: 1,  duration: 1.4, ease: "power2.inOut" }, 12.2)
+    // Hold on closed branded box
+    .to({}, { duration: 0.9 }, 13.6)
+    .to("#packaging", { opacity: 0, duration: 0.5 }, 14.0);
 }
 
-/* --------------------------- Scenes 6–7: reveals ------------------------- */
+/* ======================== REVEALS — scenes 6–7 ======================== */
 function initReveals() {
   gsap.utils.toArray(".reveal").forEach((el) => {
     gsap.to(el, {
-      opacity: 1,
-      y: 0,
-      duration: 1,
-      ease: "power2.out",
+      opacity: 1, y: 0, duration: 1, ease: "power2.out",
       scrollTrigger: { trigger: el, start: "top 88%" },
     });
   });
 
   const top = $("#backToTop");
   if (top) {
-    top.addEventListener("click", () => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
+    top.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
   }
 }
 
-/* ------------------------------- bootstrap ------------------------------- */
+/* ======================== BOOTSTRAP ======================== */
 async function boot() {
   wireContact();
+  initParticles();
   initOpening();
   initGallery({
     section: $("#collection"),
@@ -231,35 +293,32 @@ async function boot() {
   });
   initReveals();
 
-  const loader = $("#loader");
-  const fill = $("#loaderFill");
-  const canvas = $("#scene");
+  const loaderEl = $("#loader");
+  const fillEl   = $("#loaderFill");
+  const canvas   = $("#scene");
   const viewport = $("#stageViewport");
 
   try {
-    // 3D module + GLB assets load after first paint, never blocking the opening.
     const { createStage } = await import("/javascripts/three-scene.js");
     const stage = await createStage({
       canvas,
       viewport,
       onProgress: (p) => {
-        if (fill) fill.style.width = Math.round(p * 100) + "%";
+        if (fillEl) fillEl.style.width = Math.round(p * 100) + "%";
       },
     });
-    loader.classList.add("is-done");
+    loaderEl.classList.add("is-done");
     initStory(stage);
     ScrollTrigger.addEventListener("refresh", stage.refresh);
     ScrollTrigger.refresh();
   } catch (err) {
-    // Graceful degradation: the copy-driven scenes still work without WebGL.
     console.error("3D stage unavailable:", err);
-    loader.classList.add("is-done");
+    loaderEl.classList.add("is-done");
     document.getElementById("stage")?.classList.add("is-fallback");
     gsap.set(["#heroCopy", ".panel", "#packaging"], { opacity: 1 });
   }
 }
 
-// Defer the heavy work until the browser is idle after first paint.
 if ("requestIdleCallback" in window) {
   requestIdleCallback(boot, { timeout: 1200 });
 } else {
