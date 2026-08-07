@@ -14,6 +14,9 @@ const CONTACT = {
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Use GSAP's recommended mobile-safe scroll approach
+ScrollTrigger.config({ limitCallbacks: true, syncInterval: 999 });
+
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const isPhone = () => window.matchMedia("(max-width: 700px)").matches;
 const $ = (sel) => document.querySelector(sel);
@@ -35,8 +38,8 @@ function wireContact() {
 }
 
 /* ======================== LANTERN PARTICLE SYSTEM ========================
-   Warm amber/gold glowing orbs float upward like lantern light,
-   creating the atmosphere of an Arabic atelier / souk at night.
+   Warm amber/gold glowing orbs float upward like lantern light.
+   Reduced count on all devices for smooth scrolling.
    ========================================================================= */
 function initParticles() {
   if (reduceMotion) return;
@@ -58,17 +61,16 @@ function initParticles() {
     reset(initial = false) {
       this.x    = Math.random() * window.innerWidth;
       this.y    = initial ? Math.random() * window.innerHeight : window.innerHeight + 10;
-      this.vy   = -(0.35 + Math.random() * 0.9);   // upward
-      this.vx   = (Math.random() - 0.5) * 0.3;     // gentle drift
+      this.vy   = -(0.35 + Math.random() * 0.9);
+      this.vx   = (Math.random() - 0.5) * 0.3;
       this.size = 1.5 + Math.random() * 3.5;
       this.life = 0;
       this.maxLife = 220 + Math.random() * 280;
-      // Warm gold → amber → pale ivory colour range
-      const hue  = 36 + Math.random() * 28;         // 36–64 deg (gold band)
+      const hue  = 36 + Math.random() * 28;
       const sat  = 70 + Math.random() * 30;
       const lum  = 65 + Math.random() * 25;
       this.color = `hsl(${hue},${sat}%,${lum}%)`;
-      this.wave  = Math.random() * Math.PI * 2;     // sine wave offset
+      this.wave  = Math.random() * Math.PI * 2;
     }
 
     update() {
@@ -80,7 +82,6 @@ function initParticles() {
 
     draw() {
       const prog  = this.life / this.maxLife;
-      // fade in for first 15%, full for middle, fade out for last 20%
       const alpha = prog < 0.15
         ? prog / 0.15
         : prog > 0.8
@@ -90,7 +91,6 @@ function initParticles() {
       ctx.save();
       ctx.globalAlpha = alpha * 0.55;
 
-      // Soft glow halo
       const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 3.5);
       grd.addColorStop(0,   this.color);
       grd.addColorStop(0.4, this.color.replace("hsl", "hsla").replace(")", `,${0.4})`).replace("hsla(", "hsl("));
@@ -101,7 +101,6 @@ function initParticles() {
       ctx.arc(this.x, this.y, this.size * 3.5, 0, Math.PI * 2);
       ctx.fill();
 
-      // Bright core
       ctx.globalAlpha = alpha * 0.85;
       ctx.fillStyle = this.color;
       ctx.beginPath();
@@ -112,17 +111,24 @@ function initParticles() {
     }
   }
 
-  // More particles for a richer atelier atmosphere
-  const COUNT = isPhone() ? 55 : 90;
+  // Reduced particle count — particles are expensive on mobile compositing
+  const COUNT = isPhone() ? 28 : 55;
   const particles = Array.from({ length: COUNT }, () => new Particle());
 
+  // Throttle particle animation to ~20fps — imperceptible for floating orbs
+  // but saves significant GPU/CPU budget for the 3D scene during scroll
+  let lastFrame = 0;
+  const PARTICLE_INTERVAL = isPhone() ? 50 : 33; // ~20fps mobile, ~30fps desktop
+
   let rafId;
-  function loop() {
+  function loop(now) {
+    rafId = requestAnimationFrame(loop);
+    if (now - lastFrame < PARTICLE_INTERVAL) return;
+    lastFrame = now;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     particles.forEach((p) => { p.update(); p.draw(); });
-    rafId = requestAnimationFrame(loop);
   }
-  loop();
+  rafId = requestAnimationFrame(loop);
 }
 
 /* ======================== OPENING SCENE ======================== */
@@ -167,7 +173,7 @@ function initOpening() {
       trigger: "#opening",
       start: "top top",
       end: "bottom top",
-      scrub: 1,
+      scrub: 1.5, // slightly looser scrub = less janky on slow devices
       invalidateOnRefresh: true,
       onEnter:     () => nav.classList.add("is-active"),
       onLeaveBack: () => { nav.classList.remove("is-active"); park(false); },
@@ -204,6 +210,10 @@ function initStory(stage) {
   const panels = gsap.utils.toArray(".panel");
   const SWEEP  = (stage.isPhone ? 115 : 150) * (Math.PI / 180);
 
+  // scrub: 2 on mobile gives the GPU more time between scroll ticks — reduces
+  // the "jitter while scrolling" that happens when scrub is too tight
+  const scrubSpeed = isPhone() ? 2 : 1;
+
   const tl = gsap.timeline({
     defaults: { ease: "power2.inOut" },
     scrollTrigger: {
@@ -212,7 +222,7 @@ function initStory(stage) {
       end: "bottom bottom",
       pin: "#stageViewport",
       pinType: "fixed",
-      scrub: 1,
+      scrub: scrubSpeed,
       anticipatePin: 1,
       invalidateOnRefresh: true,
     },
@@ -237,30 +247,15 @@ function initStory(stage) {
     ).to(panel, { opacity: 0, y: -20, duration: 0.45 }, at + 0.75);
   });
 
-  /* Scene 4 — fold → box → lid lifts → dress into box → lid closes
-     ---------------------------------------------------------------
-     7.1  thobe begins folding (exits down, folded rises)
-     8.2  box rises into frame
-     8.8  lid begins lifting upward (gift-box style)
-     9.6  lid fully open — dress hovers above open box
-    10.4  dress slides straight down into box
-    11.8  dress faded out, fully inside box
-    12.2  lid starts closing
-    13.4  lid closed — branded box faces camera
-    14.2  packaging copy fades
-  */
+  /* Scene 4 — packaging sequence */
   tl.to("#packaging", { opacity: 1, duration: 0.6, ease: "power2.out" }, 6.9)
-    .to(state, { pack: 1,   duration: 1.4, ease: "power2.inOut" }, 6.9)
+    .to(state, { pack: 1,    duration: 1.4, ease: "power2.inOut" }, 6.9)
     .to(state, { fold: 0.45, duration: 0.9, ease: "power2.inOut" }, 7.1)
-    .to(state, { boxIn: 1,  duration: 1.0, ease: "power3.out"  }, 8.2)
-    .to(state, { fold: 1,   duration: 1.0, ease: "power2.inOut" }, 8.3)
-    // Lid lifts upward — slow, deliberate gift-box reveal
-    .to(state, { lid: 1,    duration: 1.6, ease: "power1.inOut" }, 8.8)
-    // Once lid is up, folded dress descends straight into the open box
-    .to(state, { slide: 1,  duration: 1.5, ease: "power2.inOut" }, 10.4)
-    // Lid closes gently after dress is settled inside
-    .to(state, { close: 1,  duration: 1.4, ease: "power2.inOut" }, 12.2)
-    // Hold on closed branded box
+    .to(state, { boxIn: 1,   duration: 1.0, ease: "power3.out"  }, 8.2)
+    .to(state, { fold: 1,    duration: 1.0, ease: "power2.inOut" }, 8.3)
+    .to(state, { lid: 1,     duration: 1.6, ease: "power1.inOut" }, 8.8)
+    .to(state, { slide: 1,   duration: 1.5, ease: "power2.inOut" }, 10.4)
+    .to(state, { close: 1,   duration: 1.4, ease: "power2.inOut" }, 12.2)
     .to({}, { duration: 0.9 }, 13.6)
     .to("#packaging", { opacity: 0, duration: 0.5 }, 14.0);
 }
@@ -319,8 +314,10 @@ async function boot() {
   }
 }
 
-if ("requestIdleCallback" in window) {
-  requestIdleCallback(boot, { timeout: 1200 });
+// Boot on window load — guarantees DOM + GSAP globals are fully ready.
+// This is more reliable than requestIdleCallback on mobile Safari.
+if (document.readyState === "complete") {
+  boot();
 } else {
-  window.addEventListener("load", boot);
+  window.addEventListener("load", boot, { once: true });
 }

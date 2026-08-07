@@ -18,23 +18,31 @@
     />
 
     <meta property="og:type" content="website">
-<meta property="og:title" content="Qalid">
-<meta property="og:description" content="Luxury Arabic Fashion & Premium Thobes">
-<meta property="og:url" content="https://qalidotae-elegant-arabic-fashion.vercel.app/">
-<meta property="og:image" content="https://qalidotae-elegant-arabic-fashion.vercel.app/logo.png">
+    <meta property="og:title" content="Qalid">
+    <meta property="og:description" content="Luxury Arabic Fashion & Premium Thobes">
+    <meta property="og:url" content="https://qalidotae-elegant-arabic-fashion.vercel.app/">
+    <meta property="og:image" content="https://qalidotae-elegant-arabic-fashion.vercel.app/logo.png">
 
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Qalid">
-<meta name="twitter:description" content="Luxury Arabic Fashion & Premium Thobes">
-<meta name="twitter:image" content="https://qalidotae-elegant-arabic-fashion.vercel.app/logo.png">
-    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Qalid">
+    <meta name="twitter:description" content="Luxury Arabic Fashion & Premium Thobes">
+    <meta name="twitter:image" content="https://qalidotae-elegant-arabic-fashion.vercel.app/logo.png">
+
     <link rel="icon" href="/logo-white.png" />
-  <link rel="apple-touch-icon" href="/logo-white.png" />
-    <!-- Hero asset preloads keep the opening frame instant -->
+    <link rel="apple-touch-icon" href="/logo-white.png" />
+
+    <!-- Hero asset preloads -->
     <link rel="preload" as="image" href="/logo.png" />
 
-    <!-- Import map: three's example loaders import the bare "three" specifier,
-         so it must be mapped before any module script runs. -->
+    <!-- GSAP must load before modules so gsap/ScrollTrigger are globals -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+    <!--
+      Import map MUST appear before any type="module" script.
+      Placed here (after GSAP sync scripts, before module entry) so the
+      browser registers it before resolving bare "three" specifiers.
+    -->
     <script type="importmap">
       {
         "imports": {
@@ -45,18 +53,11 @@
     </script>
 
     <link rel="stylesheet" href="/stylesheets/style.css" />
-
-
-    <link rel="stylesheet" href="/stylesheets/style.css" />
   </head>
   <body>
     {{{body}}}
 
-    <!-- GSAP + ScrollTrigger (no npm dependencies added) -->
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-
-    <!-- Application modules (ESM, deferred by nature) -->
+    <!-- Application entry point (ESM module, deferred by nature) -->
     <script type="module" src="/javascripts/main.js"></script>
   </body>
 </html>

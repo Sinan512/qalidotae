@@ -836,3 +836,72 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     transform: none !important;
   }
 }
+
+/* ==========================================================================
+   PERFORMANCE & SMOOTH SCROLL ADDITIONS
+   ========================================================================== */
+
+/* Native smooth scrolling — hardware-accelerated on iOS/Android */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Promote fixed/animated elements to their own compositor layer.
+   This prevents them from triggering repaints on the main layer
+   during scroll, which was the primary cause of scroll jank. */
+#particleCanvas,
+.opening__logo,
+.nav,
+.stage__viewport,
+.stage__canvas,
+.loader {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Avoid painting the thobe strip canvases on every scroll frame */
+.thobe-strip {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  contain: layout style paint;
+}
+
+/* Collection track is animated by GSAP — give it its own layer */
+.collection__track {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Prevent the fixed particle canvas from blocking scroll events */
+#particleCanvas {
+  pointer-events: none;
+  touch-action: none;
+}
+
+/* Remove will-change from cards at rest (it was reserving GPU memory
+   for every card simultaneously — expensive on mobile) */
+.card {
+  will-change: auto;
+  transition: transform 0.45s cubic-bezier(0.22,1,0.36,1),
+              box-shadow 0.45s cubic-bezier(0.22,1,0.36,1),
+              border-color 0.45s cubic-bezier(0.22,1,0.36,1);
+}
+.card:hover {
+  will-change: transform;
+}
+
+/* Keep collection track will-change only while marquee is active */
+.collection.is-marquee .collection__track {
+  will-change: transform;
+}
+
+/* Contain the body background pseudo-elements so they don't
+   trigger full-page repaints on scroll */
+body::before,
+body::after {
+  will-change: auto;
+  contain: strict;
+}

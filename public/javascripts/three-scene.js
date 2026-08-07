@@ -2,7 +2,8 @@
    three-scene.js
    Main 3D stage: thobe rise → showcase → box opens (lid lifts up like a
    gift box) → folded dress placed inside → lid closes with logo facing.
-   + Ambient background thobe canvases with color-tint cycling.
+   + Ambient background thobe canvases with a SINGLE shared WebGL renderer
+     (avoids WebGL context limit on mobile which caused models to vanish).
    ========================================================================== */
 
 import * as THREE from "three";
@@ -101,11 +102,6 @@ function findLid(root) {
   return byName || highest;
 }
 
-/**
- * Build a hinge pivot at the CENTRE-BOTTOM of the lid so it lifts straight up.
- * For a gift box the lid lifts off the top — pivot at bottom-centre of lid,
- * rotating around X so the front of the lid rises away from camera.
- */
 function buildLidPivot(lidMesh) {
   if (!lidMesh || !lidMesh.parent) return null;
   const parent = lidMesh.parent;
@@ -115,11 +111,10 @@ function buildLidPivot(lidMesh) {
   const min   = parent.worldToLocal(world.min.clone());
   const max   = parent.worldToLocal(world.max.clone());
 
-  // Hinge sits at the bottom-centre of the lid (lift-up pivot)
   const hinge = new THREE.Vector3(
     (min.x + max.x) / 2,
-    Math.min(min.y, max.y), // bottom of lid
-    (min.z + max.z) / 2    // centre depth
+    Math.min(min.y, max.y),
+    (min.z + max.z) / 2
   );
 
   const pivot = new THREE.Group();
@@ -132,81 +127,127 @@ function buildLidPivot(lidMesh) {
 
 /* ============================================================
    AMBIENT THOBE CANVASES
-   6 small WebGL canvases scattered across the page, each with
-   a slowly rotating, colour-cycling thobe.
+   Uses a SINGLE offscreen WebGL renderer that draws each canvas
+   in sequence via scissor/viewport. This avoids the mobile
+   browser WebGL context limit (typically 4–8) that caused the
+   main stage canvas to silently lose its context.
    ============================================================ */
 function createAmbientThobes(gltfScene) {
-  const containers = document.querySelectorAll(".thobe-strip__canvas");
-  if (!containers.length) return [];
+  const canvases = Array.from(document.querySelectorAll(".thobe-strip__canvas"));
+  if (!canvases.length) return { stop: () => {} };
 
-  const instances = [];
+  // One shared offscreen renderer draws all ambient views
+  const sharedRenderer = new THREE.WebGLRenderer({
+    alpha: true,
+    antialias: false,
+    powerPreference: "default",
+  });
+  sharedRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  sharedRenderer.outputColorSpace = THREE.SRGBColorSpace;
+  sharedRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+  sharedRenderer.toneMappingExposure = 1.1;
+  sharedRenderer.autoClear = false;
 
-  containers.forEach((canvas, idx) => {
-    try {
-      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-      renderer.outputColorSpace = THREE.SRGBColorSpace;
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.1;
+  // Build per-canvas scene/camera/wrapper data
+  const instances = canvases.map((canvas, idx) => {
+    const w = canvas.clientWidth  || 140;
+    const h = canvas.clientHeight || 200;
 
-      const w = canvas.clientWidth  || 140;
-      const h = canvas.clientHeight || 200;
-      renderer.setSize(w, h, false);
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 100);
+    camera.position.z = 5.5;
 
-      const scene  = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 100);
-      camera.position.z = 5.5;
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x8899cc, 1.2));
+    const dl = new THREE.DirectionalLight(0xffeedd, 1.4);
+    dl.position.set(2, 3, 4);
+    scene.add(dl);
 
-      scene.add(new THREE.HemisphereLight(0xffffff, 0x8899cc, 1.2));
-      const dl = new THREE.DirectionalLight(0xffeedd, 1.4);
-      dl.position.set(2, 3, 4);
-      scene.add(dl);
+    const clone = gltfScene.clone(true);
+    const { wrapper } = normalize(clone, 2.0);
+    wrapper.rotation.y = DRESS_FRONT_YAW;
+    scene.add(wrapper);
 
-      // Clone the scene so each canvas gets independent materials
-      const clone = gltfScene.clone(true);
-      const { wrapper } = normalize(clone, 2.0);
-      wrapper.rotation.y = DRESS_FRONT_YAW;
+    const setColor = makeColorable(clone);
 
-      const setColor = makeColorable(clone);
-      scene.add(wrapper);
+    const phase    = (idx / canvases.length) * Math.PI * 2;
+    const speed    = 0.28 + idx * 0.07;
+    const colorIdx = idx % TINT_COLORS.length;
 
-      // Stagger phase and rotation speed per instance
-      const phase  = (idx / containers.length) * Math.PI * 2;
-      const speed  = 0.28 + idx * 0.07;
-      const colorIdx = idx % TINT_COLORS.length;
-
-      let running = true;
-      const clock = new THREE.Clock();
-
-      const tick = () => {
-        if (!running) return;
-        requestAnimationFrame(tick);
-        const t = clock.getElapsedTime();
-
-        // Gentle left-right sway + slow spin
-        wrapper.rotation.y = DRESS_FRONT_YAW + Math.sin(t * speed + phase) * 0.55;
-        wrapper.position.y = Math.sin(t * 0.6 + phase) * 0.08;
-
-        // Color cycle: blend between two neighbouring tints
-        const cycleSpeed = 0.18;
-        const cycleT  = (t * cycleSpeed + idx * 0.4) % TINT_COLORS.length;
-        const ci      = Math.floor(cycleT) % TINT_COLORS.length;
-        const cn      = (ci + 1) % TINT_COLORS.length;
-        const blend   = cycleT - Math.floor(cycleT);
-        const mixed   = TINT_COLORS[ci].clone().lerp(TINT_COLORS[cn], blend);
-        setColor(mixed, 0.22);
-
-        renderer.render(scene, camera);
-      };
-      requestAnimationFrame(tick);
-
-      instances.push({ renderer, running: () => running, stop: () => { running = false; } });
-    } catch (e) {
-      // silently skip if WebGL context limit reached
-    }
+    return { canvas, scene, camera, wrapper, setColor, phase, speed, colorIdx, w, h };
   });
 
-  return instances;
+  // Size the shared renderer to the largest canvas dimension
+  const maxW = Math.max(...instances.map(i => i.w));
+  const maxH = Math.max(...instances.map(i => i.h));
+  sharedRenderer.setSize(maxW, maxH, false);
+
+  const clock = new THREE.Clock();
+  let running  = true;
+  let rafId    = null;
+
+  // Intersection observer — only run when the strips are visible
+  let stripVisible = false;
+  const observer = new IntersectionObserver(
+    (entries) => { stripVisible = entries.some((e) => e.isIntersecting); },
+    { rootMargin: "200px" }
+  );
+  canvases.forEach((c) => observer.observe(c));
+
+  function tick() {
+    if (!running) return;
+    rafId = requestAnimationFrame(tick);
+    if (!stripVisible) return; // skip rendering when off-screen
+
+    const t = clock.getElapsedTime();
+    sharedRenderer.clear();
+
+    instances.forEach(({ canvas, scene, camera, wrapper, setColor, phase, speed, colorIdx, w, h }) => {
+      // Resize scissor to this canvas's dimensions
+      sharedRenderer.setViewport(0, 0, w, h);
+      sharedRenderer.setScissor(0, 0, w, h);
+      sharedRenderer.setScissorTest(true);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+
+      // Gentle sway + spin
+      wrapper.rotation.y = DRESS_FRONT_YAW + Math.sin(t * speed + phase) * 0.55;
+      wrapper.position.y = Math.sin(t * 0.6 + phase) * 0.08;
+
+      // Color cycle
+      const cycleT  = (t * 0.18 + colorIdx * 0.4) % TINT_COLORS.length;
+      const ci      = Math.floor(cycleT) % TINT_COLORS.length;
+      const cn      = (ci + 1) % TINT_COLORS.length;
+      const blend   = cycleT - Math.floor(cycleT);
+      const mixed   = TINT_COLORS[ci].clone().lerp(TINT_COLORS[cn], blend);
+      setColor(mixed, 0.22);
+
+      sharedRenderer.render(scene, camera);
+
+      // Copy the rendered result into the visible canvas
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.clearRect(0, 0, w, h);
+        ctx.drawImage(sharedRenderer.domElement, 0, maxH - h, w, h, 0, 0, w, h);
+      }
+    });
+  }
+
+  // Convert thobe-strip canvases to 2D so we can draw into them
+  instances.forEach(({ canvas, w, h }) => {
+    canvas.width  = w;
+    canvas.height = h;
+  });
+
+  rafId = requestAnimationFrame(tick);
+
+  return {
+    stop() {
+      running = false;
+      observer.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+      sharedRenderer.dispose();
+    },
+  };
 }
 
 /* ============================================================
@@ -218,10 +259,17 @@ export async function createStage({ canvas, viewport, onProgress }) {
   let isPhone  = mqPhone.matches;
   let isTablet = mqTablet.matches;
 
+  // Use lower pixel ratio on mobile for much better performance
+  const dpr = Math.min(window.devicePixelRatio, isPhone ? 1 : 1.5);
+
   const renderer = new THREE.WebGLRenderer({
-    canvas, antialias: !isPhone, alpha: true, powerPreference: "high-performance",
+    canvas,
+    antialias: !isPhone,
+    alpha: true,
+    powerPreference: "high-performance",
+    // Preserve drawing buffer is false (default) — better perf
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isPhone ? 1.6 : 2));
+  renderer.setPixelRatio(dpr);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
@@ -229,7 +277,6 @@ export async function createStage({ canvas, viewport, onProgress }) {
   const scene  = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
 
-  // Warm golden-tinted studio lighting for the atelier atmosphere
   scene.add(new THREE.HemisphereLight(0xfff5e0, 0x0d1428, 1.1));
   const key = new THREE.DirectionalLight(0xffeedd, 1.5);
   key.position.set(2.6, 3.4, 4.2);
@@ -260,10 +307,9 @@ export async function createStage({ canvas, viewport, onProgress }) {
     load(BOX_URL,   "box"),
   ]);
 
-  // Spin up ambient thobe canvases using the thobe GLB
-  createAmbientThobes(dressRaw.clone ? dressRaw.clone(true) : dressRaw);
+  // Spin up ambient thobes AFTER main models load, using a clone
+  const ambientHandle = createAmbientThobes(dressRaw.clone(true));
 
-  // Scale hierarchy: thobe sets base, box matches thobe width, fold fits box
   const dress  = normalize(dressRaw, DRESS_HEIGHT);
   const dressFrontWidth = dress.size.z;
   const box    = normalizeWidth(boxRaw, dressFrontWidth * BOX_WIDTH_RATIO);
@@ -283,19 +329,14 @@ export async function createStage({ canvas, viewport, onProgress }) {
   boxGroup.visible  = false;
   scene.add(dressGroup, foldGroup, boxGroup);
 
-  /* ---- Lid pivot (lift-up like a gift box) ---- */
   const lidMesh  = findLid(boxRaw);
   const lidPivot = buildLidPivot(lidMesh);
 
-  // We need the natural "closed" Y position of the lid so we can animate it
-  // upward. When open, the pivot rotates -π (180°) around X so the lid
-  // travels straight up and over, clearing the opening fully.
-  const LID_OPEN_ANGLE = -Math.PI; // rotate 180° upward over the back
+  const LID_OPEN_ANGLE = -Math.PI;
 
-  /* Box geometry landmarks */
   const BOX_Y    = -DRESS_HEIGHT * 0.3;
   const MOUTH_Y  = BOX_Y + box.size.y * 0.5;
-  const INSIDE_Y = BOX_Y - box.size.y * 0.15; // folded dress rests just inside
+  const INSIDE_Y = BOX_Y - box.size.y * 0.15;
   const RISE_FROM = -(DRESS_HEIGHT * 0.5 + 1.6);
 
   // ------------------------------------------------------------------ state
@@ -304,9 +345,9 @@ export async function createStage({ canvas, viewport, onProgress }) {
     rotate:   0,
     fold:     0,
     boxIn:    0,
-    lid:      0, // 0=closed, 1=fully open
+    lid:      0,
     slide:    0,
-    close:    0, // 0=open, 1=closed again
+    close:    0,
     zoom:     0,
     pack:     0,
     floatAmp: isPhone ? 0.04 : 0.075,
@@ -331,7 +372,7 @@ export async function createStage({ canvas, viewport, onProgress }) {
     isPhone  = mqPhone.matches;
     isTablet = mqTablet.matches;
     state.floatAmp = isPhone ? 0.04 : 0.075;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isPhone ? 1.6 : 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isPhone ? 1 : 1.5));
   }
 
   readBreakpoints();
@@ -340,33 +381,38 @@ export async function createStage({ canvas, viewport, onProgress }) {
   let resizeTimer;
   const onResize = () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => { readBreakpoints(); frame(); }, 120);
+    resizeTimer = setTimeout(() => { readBreakpoints(); frame(); }, 150);
   };
-  window.addEventListener("resize", onResize);
-  window.addEventListener("orientationchange", onResize);
+  window.addEventListener("resize", onResize, { passive: true });
+  window.addEventListener("orientationchange", onResize, { passive: true });
 
   // --------------------------------------------------------------- render loop
-  const clock = new THREE.Clock();
-  let running = true;
+  // Throttle to 30fps on mobile to massively reduce jank during scroll
+  const clock     = new THREE.Clock();
+  let running     = true;
+  let lastRender  = 0;
+  const TARGET_MS = isPhone ? 1000 / 30 : 1000 / 60;
 
   function onScreen() {
     const r = viewport.getBoundingClientRect();
     return r.bottom > -120 && r.top < window.innerHeight + 120 && r.width > 0;
   }
 
-  function tick() {
+  function tick(now) {
     if (!running) return;
     requestAnimationFrame(tick);
     if (!onScreen()) return;
 
+    // Frame-rate throttle on mobile
+    if (isPhone && now - lastRender < TARGET_MS) return;
+    lastRender = now;
+
     const t = clock.getElapsedTime();
 
-    // Gentle float — damped once the piece starts folding
     const settle  = 1 - Math.min(1, state.fold + state.slide);
     const float   = Math.sin(t * 0.75) * state.floatAmp * settle;
     const sway    = Math.sin(t * 0.45) * 0.035 * settle;
 
-    /* ---- thobe exit / folded piece enter ---- */
     const f      = state.fold;
     const restY  = RISE_FROM + (0 - RISE_FROM) * state.reveal;
     const BELOW_Y = RISE_FROM;
@@ -391,14 +437,10 @@ export async function createStage({ canvas, viewport, onProgress }) {
     dressGroup.visible = state.reveal > 0.001 && outA > 0.002;
     if (dressGroup.visible) setDressOpacity(outA);
 
-    /* ---- folded piece: hover above open box → lower straight in ---- */
-    // While sliding in, it descends straight down into the box mouth
     const foldY = BELOW_Y + (hoverY - BELOW_Y) * inT + (INSIDE_Y - hoverY) * slideT;
-    // No Z shift needed — dress goes straight down into the open box
     foldGroup.position.set(0, foldY + float * (1 - slideT), 0);
     foldGroup.scale.setScalar(1);
     foldGroup.rotation.y = FOLD_FRONT_YAW + sway * 0.1 * (1 - slideT);
-    // Lay flat as it settles into the box
     foldGroup.rotation.x = -(Math.PI / 2) * smooth(state.slide * 1.2);
     foldGroup.rotation.z = 0;
 
@@ -406,7 +448,6 @@ export async function createStage({ canvas, viewport, onProgress }) {
     foldGroup.visible = foldA > 0.002;
     if (foldGroup.visible) setFoldOpacity(foldA);
 
-    /* ---- box ---- */
     boxGroup.visible = state.boxIn > 0.001;
     boxGroup.position.y = BOX_Y - (1 - state.boxIn) * 0.7;
     boxGroup.position.x = 0;
@@ -415,17 +456,12 @@ export async function createStage({ canvas, viewport, onProgress }) {
     boxGroup.rotation.x = 0;
     boxGroup.rotation.z = 0;
 
-    /* ---- Lid: lift straight UP (gift box style) ----
-       state.lid   0→1 opens it (pivot rotates to LID_OPEN_ANGLE)
-       state.close 0→1 closes it back to 0                           */
     if (lidPivot) {
       const openT  = smooth(state.lid);
       const closeT = smooth(state.close);
-      // lid lifts to full open, then comes straight back down
       lidPivot.rotation.x = LID_OPEN_ANGLE * openT * (1 - closeT);
     }
 
-    /* ---- camera ---- */
     const tilt     = isPhone ? 0.35 : 1;
     const packPull = 1 - 0.62 * state.pack;
     camera.position.z = baseZ * (1 - (isPhone ? 0.06 : 0.14) * state.zoom) * packPull;
@@ -443,6 +479,7 @@ export async function createStage({ canvas, viewport, onProgress }) {
     refresh: frame,
     dispose() {
       running = false;
+      ambientHandle.stop();
       window.removeEventListener("resize", onResize);
       window.removeEventListener("orientationchange", onResize);
       renderer.dispose();
