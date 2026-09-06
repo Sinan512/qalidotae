@@ -44,16 +44,16 @@ async function seedPaymentSetupIfEmpty() {
       console.log('✅ Initialized default Payment Setup in PAYMENT_SETUP');
     }
   } catch (err) {
-    console.error('⚠️ Error checking/initializing Payment Setup:', err.message);
+    console.error('⚠️ Error checking/initializing Payment Setup: ', err.message);
   }
 }
 
-async function connectDB(customUri) {
-  var uri = customUri || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/qalid';
+async function connectDB() {
+  var uri = process.env.MONGODB_URI;
   try {
     if (mongoose.connection.readyState === 0) {
-      await mongoose.connect(uri);
       console.log('📦 Connected to MongoDB at:', uri);
+      await mongoose.connect(uri);
       await seedAdminIfEmpty();
       await seedPaymentSetupIfEmpty();
     }

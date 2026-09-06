@@ -59,6 +59,6 @@ var userSchema = new mongoose.Schema({
   collection: 'USERSDETALIS'
 });
 
-var User = mongoose.model('User', userSchema, 'USERSDETALIS');
+var User = mongoose.model('User', userSchema, 'USERSDETAILS');
 
 module.exports = User;
