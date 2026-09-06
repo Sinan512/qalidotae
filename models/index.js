@@ -11,8 +11,8 @@ async function seedAdminIfEmpty() {
   try {
     var adminCount = await Admin.countDocuments();
     if (adminCount === 0) {
-      var defaultEmail = process.env.ADMIN_EMAIL || 'admin@qalidotae.com';
-      var defaultPass = process.env.ADMIN_PASSWORD || 'admin123456';
+      var defaultEmail = process.env.ADMIN_EMAIL ;
+      var defaultPass = process.env.ADMIN_PASSWORD ;
       var hashedPassword = await Admin.hashPassword(defaultPass);
 
       await Admin.create({
