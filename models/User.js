@@ -56,8 +56,12 @@ var userSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true,
-  collection: 'USERSDETALIS'
+  collection: 'USERSDETAILS'
 });
+
+userSchema.methods.comparePassword = function (candidatePassword) {
+  return this.password === candidatePassword;
+};
 
 var User = mongoose.model('User', userSchema, 'USERSDETAILS');
 

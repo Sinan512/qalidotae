@@ -359,135 +359,137 @@ async function seed() {
         {
           orderNumber: 'QAL-2026-1001',
           userId: allUsers[0]._id,
-          productId: allProducts[0]._id,
-          selectedSizes: ['L', 'XL'],
-          quantity: 2,
-          totalPrice: allProducts[0].price * 2,
+          items: [
+            { productId: allProducts[0]._id, selectedSize: 'L', quantity: 2, price: allProducts[0].price, color: 'Pure White' },
+            { productId: allProducts[1]._id, selectedSize: 'XL', quantity: 1, price: allProducts[1].price, color: 'Obsidian Black' }
+          ],
+          totalPrice: (allProducts[0].price * 2) + allProducts[1].price,
           status: 'order pending',
-          paymentMode: 'GPay / +971 50 123 4567',
+          paymentMode: 'Cash On Delivery',
           shippingNotes: 'Deliver to front gate, call on arrival'
         },
         {
           orderNumber: 'QAL-2026-1002',
           userId: allUsers[1]._id,
-          productId: allProducts[3]._id,
-          selectedSizes: ['M'],
-          quantity: 1,
+          items: [
+            { productId: allProducts[3]._id, selectedSize: 'M', quantity: 1, price: allProducts[3].price, color: 'Onyx Black' }
+          ],
           totalPrice: allProducts[3].price,
           status: 'order confirmed',
-          paymentMode: 'UPI / qalidotae@okaxis',
+          paymentMode: 'Cash On Delivery',
           shippingNotes: 'Gift packaging requested with golden ribbon'
         },
         {
           orderNumber: 'QAL-2026-1003',
           userId: allUsers[2]._id,
-          productId: allProducts[1]._id,
-          selectedSizes: ['XL'],
-          quantity: 1,
+          items: [
+            { productId: allProducts[1]._id, selectedSize: 'XL', quantity: 1, price: allProducts[1].price, color: 'Deep Navy' }
+          ],
           totalPrice: allProducts[1].price,
           status: 'delivery ongoing',
-          paymentMode: 'Bank Transfer (Emirates NBD)',
+          paymentMode: 'Cash On Delivery',
           shippingNotes: 'Express delivery before 6 PM'
         },
         {
           orderNumber: 'QAL-2026-1004',
           userId: allUsers[3]._id,
-          productId: allProducts[4]._id,
-          selectedSizes: ['S', 'M'],
-          quantity: 2,
+          items: [
+            { productId: allProducts[4]._id, selectedSize: 'S', quantity: 1, price: allProducts[4].price, color: 'Dusty Rose' },
+            { productId: allProducts[4]._id, selectedSize: 'M', quantity: 1, price: allProducts[4].price, color: 'Sand Dune' }
+          ],
           totalPrice: allProducts[4].price * 2,
           status: 'delivery success',
-          paymentMode: 'GPay',
+          paymentMode: 'Cash On Delivery',
           shippingNotes: 'Delivered to reception'
         },
         {
           orderNumber: 'QAL-2026-1005',
           userId: allUsers[4]._id,
-          productId: allProducts[2]._id,
-          selectedSizes: ['XXL'],
-          quantity: 1,
+          items: [
+            { productId: allProducts[2]._id, selectedSize: 'XXL', quantity: 1, price: allProducts[2].price, color: 'Crisp White' }
+          ],
           totalPrice: allProducts[2].price,
           status: 'order rejected',
           rejectionReason: 'Fabric batch temporarily out of stock. Client notified for alternative colorway.',
-          paymentMode: 'UPI',
+          paymentMode: 'Cash On Delivery',
           shippingNotes: ''
         },
         {
           orderNumber: 'QAL-2026-1006',
           userId: allUsers[5]._id,
-          productId: allProducts[6]._id,
-          selectedSizes: ['M'],
-          quantity: 1,
+          items: [
+            { productId: allProducts[6]._id, selectedSize: 'M', quantity: 1, price: allProducts[6].price, color: 'Pearl White' }
+          ],
           totalPrice: allProducts[6].price,
           status: 'order cancelled',
           rejectionReason: 'Cancelled by customer before dispatch.',
-          paymentMode: 'GPay',
+          paymentMode: 'Cash On Delivery',
           shippingNotes: ''
         },
         {
           orderNumber: 'QAL-2026-1007',
           userId: allUsers[6]._id,
-          productId: allProducts[5]._id,
-          selectedSizes: ['L'],
-          quantity: 3,
+          items: [
+            { productId: allProducts[5]._id, selectedSize: 'L', quantity: 3, price: allProducts[5].price, color: 'Midnight Blue' }
+          ],
           totalPrice: allProducts[5].price * 3,
           status: 'order confirmed',
-          paymentMode: 'GPay',
+          paymentMode: 'Cash On Delivery',
           shippingNotes: 'Deliver to Kuwait diplomatic bag'
         },
         {
           orderNumber: 'QAL-2026-1008',
           userId: allUsers[7]._id,
-          productId: allProducts[7]._id,
-          selectedSizes: ['S'],
-          quantity: 2,
+          items: [
+            { productId: allProducts[7]._id, selectedSize: 'S', quantity: 2, price: allProducts[7].price, color: 'Ice Blue' }
+          ],
           totalPrice: allProducts[7].price * 2,
           status: 'delivery ongoing',
-          paymentMode: 'UPI',
+          paymentMode: 'Cash On Delivery',
           shippingNotes: 'Leave at security booth'
         },
         {
           orderNumber: 'QAL-2026-1009',
           userId: allUsers[8]._id,
-          productId: allProducts[0]._id,
-          selectedSizes: ['M'],
-          quantity: 1,
+          items: [
+            { productId: allProducts[0]._id, selectedSize: 'M', quantity: 1, price: allProducts[0].price, color: 'Charcoal' }
+          ],
           totalPrice: allProducts[0].price,
           status: 'delivery success',
-          paymentMode: 'Bank Transfer',
+          paymentMode: 'Cash On Delivery',
           shippingNotes: ''
         },
         {
           orderNumber: 'QAL-2026-1010',
           userId: allUsers[9]._id,
-          productId: allProducts[3]._id,
-          selectedSizes: ['L'],
-          quantity: 1,
+          items: [
+            { productId: allProducts[3]._id, selectedSize: 'L', quantity: 1, price: allProducts[3].price, color: 'Emerald Green' }
+          ],
           totalPrice: allProducts[3].price,
           status: 'order pending',
-          paymentMode: 'GPay',
+          paymentMode: 'Cash On Delivery',
           shippingNotes: 'Contact via WhatsApp before delivery'
         },
         {
           orderNumber: 'QAL-2026-1011',
           userId: allUsers[10]._id,
-          productId: allProducts[1]._id,
-          selectedSizes: ['XL'],
-          quantity: 1,
+          items: [
+            { productId: allProducts[1]._id, selectedSize: 'XL', quantity: 1, price: allProducts[1].price, color: 'Desert Taupe' }
+          ],
           totalPrice: allProducts[1].price,
           status: 'order pending',
-          paymentMode: 'UPI',
+          paymentMode: 'Cash On Delivery',
           shippingNotes: 'Deliver to Saadiyat Villa'
         },
         {
           orderNumber: 'QAL-2026-1012',
           userId: allUsers[11]._id,
-          productId: allProducts[4]._id,
-          selectedSizes: ['M'],
-          quantity: 1,
+          items: [
+            { productId: allProducts[4]._id, selectedSize: 'M', quantity: 1, price: allProducts[4].price, color: 'Gold Ochre' }
+          ],
           totalPrice: allProducts[4].price,
           status: 'delivery success',
-          paymentMode: 'GPay',
+          paymentMode: 'Cash On Delivery',
           shippingNotes: 'VIP packaging'
         }
       ];

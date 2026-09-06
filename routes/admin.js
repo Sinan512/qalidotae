@@ -212,7 +212,7 @@ router.get('/api/overview', requireAdminApi, async function (req, res) {
       Order.countDocuments({ status: 'delivery success' }),
       Order.countDocuments({ status: 'order cancelled' }),
       Order.countDocuments({ status: 'order rejected' }),
-      Order.find().sort({ createdAt: -1 }).limit(5).populate('userId').populate('productId'),
+      Order.find().sort({ createdAt: -1 }).limit(5).populate('userId').populate('items.productId'),
       Product.find({ totalStock: { $lte: 5 }, archive: false }).limit(6)
     ]);
 
@@ -513,10 +513,10 @@ router.delete('/api/users/:id', requireAdminApi, async function (req, res) {
    ========================================================================= */
 router.get('/api/orders', requireAdminApi, async function (req, res) {
   try {
-    // Populate normalized references to User and Product
+    // Populate normalized references to User and Product items
     var orders = await Order.find()
       .populate('userId')
-      .populate('productId')
+      .populate('items.productId')
       .sort({ createdAt: -1 });
 
     return res.json({ success: true, orders: orders });
@@ -529,7 +529,7 @@ router.get('/api/orders/:id', requireAdminApi, async function (req, res) {
   try {
     var order = await Order.findById(req.params.id)
       .populate('userId')
-      .populate('productId');
+      .populate('items.productId');
 
     if (!order) return res.status(404).json({ success: false, message: 'Order not found.' });
     return res.json({ success: true, order: order });
@@ -568,7 +568,7 @@ router.put('/api/orders/:id/status', requireAdminApi, async function (req, res) 
     }
 
     await order.save();
-    var populatedOrder = await Order.findById(order._id).populate('userId').populate('productId');
+    var populatedOrder = await Order.findById(order._id).populate('userId').populate('items.productId');
     return res.json({ success: true, message: 'Order status updated.', order: populatedOrder });
   } catch (err) {
     console.error('Update order status error:', err);

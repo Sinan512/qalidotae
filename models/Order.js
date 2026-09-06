@@ -1,5 +1,32 @@
 var mongoose = require('mongoose');
 
+var orderItemSchema = new mongoose.Schema({
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+    required: true
+  },
+  selectedSize: {
+    type: String,
+    default: 'M'
+  },
+  quantity: {
+    type: Number,
+    required: true,
+    default: 1,
+    min: 1
+  },
+  price: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  color: {
+    type: String,
+    default: ''
+  }
+}, { _id: false });
+
 var orderSchema = new mongoose.Schema({
   orderNumber: {
     type: String,
@@ -13,20 +40,15 @@ var orderSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  productId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
-    required: true
-  },
-  selectedSizes: {
-    type: [String],
-    default: ['M']
-  },
-  quantity: {
-    type: Number,
+  items: {
+    type: [orderItemSchema],
     required: true,
-    default: 1,
-    min: 1
+    validate: [
+      function (val) {
+        return Array.isArray(val) && val.length > 0;
+      },
+      'Order must contain at least one item.'
+    ]
   },
   totalPrice: {
     type: Number,
@@ -51,7 +73,7 @@ var orderSchema = new mongoose.Schema({
   },
   paymentMode: {
     type: String,
-    default: 'UPI / GPay'
+    default: 'Cash On Delivery'
   },
   shippingNotes: {
     type: String,
