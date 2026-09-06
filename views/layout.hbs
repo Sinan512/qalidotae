@@ -18,13 +18,13 @@
     />
 
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Qalid">
+    <meta property="og:title" content="Qalidotae">
     <meta property="og:description" content="Luxury Arabic Fashion & Premium Thobes">
     <meta property="og:url" content="https://qalidotae-elegant-arabic-fashion.vercel.app/">
     <meta property="og:image" content="https://qalidotae-elegant-arabic-fashion.vercel.app/logo.png">
 
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Qalid">
+    <meta name="twitter:title" content="Qalidotaae">
     <meta name="twitter:description" content="Luxury Arabic Fashion & Premium Thobes">
     <meta name="twitter:image" content="https://qalidotae-elegant-arabic-fashion.vercel.app/logo.png">
 
@@ -34,30 +34,8 @@
     <!-- Hero asset preloads -->
     <link rel="preload" as="image" href="/logo.png" />
 
-    <!-- GSAP must load before modules so gsap/ScrollTrigger are globals -->
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-
-    <!--
-      Import map MUST appear before any type="module" script.
-      Placed here (after GSAP sync scripts, before module entry) so the
-      browser registers it before resolving bare "three" specifiers.
-    -->
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
-          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
-        }
-      }
-    </script>
-
-    <link rel="stylesheet" href="/stylesheets/style.css" />
   </head>
   <body>
     {{{body}}}
-
-    <!-- Application entry point (ESM module, deferred by nature) -->
-    <script type="module" src="/javascripts/main.js"></script>
   </body>
 </html>
