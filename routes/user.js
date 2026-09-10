@@ -167,11 +167,16 @@ router.get('/', optionalUserAuth, function (req, res, next) {
   });
 });
 
-router.get('/products', optionalUserAuth, function (req, res, next) {
-  res.render('user', {
+router.get(['/products', '/user-product-view'], optionalUserAuth, function (req, res, next) {
+  res.render('user-product-view', {
     layout: false,
     title: 'Curated Atelier Garment Catalog — Qalidotae',
     isFullCatalog: true,
+    initialType: req.query.type || 'all',
+    initialColor: req.query.color || 'all',
+    initialGender: req.query.gender || 'all',
+    initialSearch: req.query.search || '',
+    initialSort: req.query.sort || 'newest',
     user: req.user ? {
       id: req.user._id,
       fullName: req.user.fullName,
@@ -657,7 +662,7 @@ router.get('/api/orders/my-orders', requireUserAuth, async function (req, res) {
 });
 
 // Public / User Live Order Tracking by Order Number
-router.get('/api/orders/track/:orderNumber',requireUserAuth, async function (req, res) {
+router.get('/api/orders/track/:orderNumber', async function (req, res) {
   try {
     var orderNum = (req.params.orderNumber || '').trim();
     if (!orderNum) {

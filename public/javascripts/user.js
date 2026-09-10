@@ -23,7 +23,7 @@
       sortBy: 'newest',
       displayedCount: 10,
       pageSize: 10,
-      isFullCatalog: window.location.pathname.includes('/products') || window.location.search.includes('view=all'),
+      isFullCatalog: window.location.pathname.includes('/products') || window.location.pathname.includes('/user-product-view') || window.location.search.includes('view=all'),
       isLoadingMore: false,
       selectedProduct: null,
       selectedSize: 'M',
@@ -86,13 +86,69 @@
 
     let scrollObserver = null;
 
+    /* URL PARAMS INITIALIZATION */
+    function initURLParams() {
+      const params = new URLSearchParams(window.location.search);
+      const typeParam = params.get('type') || params.get('category');
+      const colorParam = params.get('color') || params.get('colour');
+      const genderParam = params.get('gender');
+      const searchParam = params.get('search') || params.get('q');
+      const sortParam = params.get('sort');
+
+      if (typeParam) state.activeCategory = typeParam;
+      if (colorParam) state.activeColor = colorParam;
+      if (genderParam) state.activeGender = genderParam;
+      if (searchParam) state.searchQuery = searchParam;
+      if (sortParam) state.sortBy = sortParam;
+
+      const searchInput = document.getElementById('catalogSearchInput');
+      if (searchInput && state.searchQuery) {
+        searchInput.value = state.searchQuery;
+        const clearBtn = document.getElementById('searchClearBtn');
+        if (clearBtn) clearBtn.style.display = 'flex';
+      }
+    }
+
+    /* =========================================================================
+       TRUST & LUXURY ASSURANCE BAR 1.5s ROTATOR (1 CARD AT A TIME FULL COL-12)
+       ========================================================================= */
+    let trustBarIntervalId = null;
+
+    function initTrustBarRotator() {
+      const container = document.getElementById('trustBarCarousel');
+      if (!container) return;
+
+      const cards = container.querySelectorAll('.trust-card');
+      if (cards.length <= 1) return;
+
+      let currentIndex = 0;
+
+      if (trustBarIntervalId) {
+        clearInterval(trustBarIntervalId);
+      }
+
+      // Ensure first card is active and others inactive initially
+      cards.forEach((card, idx) => {
+        card.classList.toggle('active', idx === 0);
+      });
+
+      trustBarIntervalId = setInterval(() => {
+        cards[currentIndex].classList.remove('active');
+        currentIndex = (currentIndex + 1) % cards.length;
+        cards[currentIndex].classList.add('active');
+        lucide.createIcons();
+      }, 1500); // 1.5 seconds per card
+    }
+
     /* =========================================================================
        INITIALIZATION
        ========================================================================= */
     document.addEventListener('DOMContentLoaded', async () => {
+      initURLParams();
       applyTheme(state.theme);
       lucide.createIcons();
       updateCartBadge();
+      initTrustBarRotator();
 
       // Parallel init: Check user session, GeoIP & Currency, Fetch products
       await Promise.all([
@@ -102,6 +158,7 @@
       ]);
 
       if (state.isFullCatalog) {
+        updateCatalogPageTitles();
         setTimeout(() => {
           const catEl = document.getElementById('catalogSection');
           if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
@@ -253,12 +310,500 @@
         const data = await res.json();
         if (data.success && Array.isArray(data.products)) {
           state.products = data.products;
+
+          // Render dynamic database categories & color cards for homepage (user.hbs)
+          renderDynamicCategoryCards();
+          renderDynamicColorCards();
+          initAutoScrollCards();
+
+          // Render top dropdown filters & modal chips for dedicated catalog (user-product-view.hbs)
+          renderDropdownFilters();
+
+          // Render fallback color chips if present
           renderColorChips();
+
+          // Apply filters and render initial grid
           applyFilters();
         }
       } catch (err) {
         console.error('Fetch Products Error:', err);
       }
+    }
+
+    /* Dynamic Database Category Cards (Horizontal Auto-Moving Carousels) */
+    function renderDynamicCategoryCards() {
+      const container = document.getElementById('categoryCardsContainer');
+      if (!container) return;
+
+      const typeCounts = {};
+      state.products.forEach(p => {
+        const t = (p.type || '').trim();
+        if (t) {
+          typeCounts[t] = (typeCounts[t] || 0) + 1;
+        }
+      });
+
+      const types = Object.keys(typeCounts).sort();
+      const totalCount = state.products.length;
+      const isAllActive = state.activeCategory === 'all';
+
+      let html = `
+        <div class="category-card ${isAllActive ? 'active' : ''}" onclick="handleCategoryCardClick('all', event)" role="button" tabindex="0" title="View All Garments">
+          <div class="category-card-top">
+            <div class="category-card-icon-wrap">
+              <i data-lucide="sparkles" style="width: 16px; height: 16px;"></i>
+            </div>
+            <span class="category-card-count">${totalCount} garments</span>
+          </div>
+          <div>
+            <h3 class="category-card-title">All Atelier Garments</h3>
+          </div>
+          <div class="category-card-action">
+            <span>Explore All</span>
+            <i data-lucide="arrow-right" style="width: 13px; height: 13px;"></i>
+          </div>
+        </div>
+      `;
+
+      types.forEach(t => {
+        const count = typeCounts[t];
+        const isActive = state.activeCategory.toLowerCase() === t.toLowerCase();
+
+        let iconName = 'shirt';
+        const lower = t.toLowerCase();
+        if (lower.includes('thobe') || lower.includes('kandura') || lower.includes('dishdasha') || lower.includes('emirati') || lower.includes('kuwaiti') || lower.includes('saudi') || lower.includes('omani')) {
+          iconName = 'crown';
+        } else if (lower.includes('abaya') || lower.includes('kaftan') || lower.includes('kimono') || lower.includes('cape')) {
+          iconName = 'feather';
+        } else if (lower.includes('bisht') || lower.includes('cloak') || lower.includes('royal')) {
+          iconName = 'award';
+        } else if (lower.includes('shawl') || lower.includes('shemagh') || lower.includes('ghutra') || lower.includes('scarf')) {
+          iconName = 'shield';
+        } else if (lower.includes('linen') || lower.includes('cotton') || lower.includes('silk')) {
+          iconName = 'sparkles';
+        }
+
+        html += `
+          <div class="category-card ${isActive ? 'active' : ''}" onclick="handleCategoryCardClick('${t.replace(/'/g, "\\'")}', event)" role="button" tabindex="0" title="Filter by ${t}">
+            <div class="category-card-top">
+              <div class="category-card-icon-wrap">
+                <i data-lucide="${iconName}" style="width: 16px; height: 16px;"></i>
+              </div>
+              <span class="category-card-count">${count} ${count === 1 ? 'piece' : 'pieces'}</span>
+            </div>
+            <div>
+              <h3 class="category-card-title">${t}</h3>
+            </div>
+            <div class="category-card-action">
+              <span>${isActive ? 'Selected' : 'Shop Type'}</span>
+              <i data-lucide="arrow-up-right" style="width: 13px; height: 13px;"></i>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function handleCategoryCardClick(type, e) {
+      if (e) e.preventDefault();
+
+      // On homepage, clicking category navigates to dedicated product view with filter applied
+      if (!state.isFullCatalog) {
+        if (type === 'all') {
+          window.location.href = '/products';
+        } else {
+          window.location.href = `/products?type=${encodeURIComponent(type)}`;
+        }
+        return;
+      }
+
+      filterByType(type, e);
+    }
+
+    /* Dynamic Database Colour Cards */
+    function renderDynamicColorCards() {
+      const container = document.getElementById('colorCardsContainer');
+      if (!container) return;
+
+      const colorCounts = {};
+      state.products.forEach(p => {
+        if (Array.isArray(p.availableColours)) {
+          p.availableColours.forEach(c => {
+            const clean = (c || '').trim();
+            if (clean) {
+              colorCounts[clean] = (colorCounts[clean] || 0) + 1;
+            }
+          });
+        }
+      });
+
+      const colors = Object.keys(colorCounts).sort();
+      const isAllActive = state.activeColor === 'all';
+
+      let html = `
+        <div class="color-card ${isAllActive ? 'active' : ''}" onclick="handleColorCardClick('all', event)" role="button" tabindex="0" title="View All Colours">
+          <div class="color-card-top">
+            <span class="color-card-swatch-large all-colors"></span>
+            <span class="color-card-count">${state.products.length}</span>
+          </div>
+          <div>
+            <div class="color-card-name">All Colours</div>
+            <div class="color-card-sub">Full Spectrum</div>
+          </div>
+        </div>
+      `;
+
+      colors.forEach(col => {
+        const count = colorCounts[col];
+        const swatchBg = getColorSwatchBg(col);
+        const isActive = state.activeColor.toLowerCase() === col.toLowerCase();
+
+        html += `
+          <div class="color-card ${isActive ? 'active' : ''}" onclick="handleColorCardClick('${col.replace(/'/g, "\\'")}', event)" role="button" tabindex="0" title="Filter by ${col}">
+            <div class="color-card-top">
+              <span class="color-card-swatch-large" style="background: ${swatchBg};"></span>
+              <span class="color-card-count">${count}</span>
+            </div>
+            <div>
+              <div class="color-card-name">${col}</div>
+              <div class="color-card-sub">${count === 1 ? '1 Edition' : `${count} Editions`}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function handleColorCardClick(color, e) {
+      if (e) e.preventDefault();
+      filterByColor(color, e);
+    }
+
+    /* Horizontal Auto-Moving Scroll Animation for Category & Colour Tracks */
+    let autoScrollAnimationId = null;
+    let isHoveringCategoryWrap = false;
+    let isHoveringColorWrap = false;
+
+    function initAutoScrollCards() {
+      const catWrap = document.getElementById('categoryScrollWrap');
+      const colWrap = document.getElementById('colorScrollWrap');
+
+      if (!catWrap && !colWrap) return;
+
+      if (catWrap) {
+        catWrap.addEventListener('mouseenter', () => { isHoveringCategoryWrap = true; });
+        catWrap.addEventListener('mouseleave', () => { isHoveringCategoryWrap = false; });
+        catWrap.addEventListener('touchstart', () => { isHoveringCategoryWrap = true; }, { passive: true });
+        catWrap.addEventListener('touchend', () => {
+          setTimeout(() => { isHoveringCategoryWrap = false; }, 1000);
+        }, { passive: true });
+      }
+
+      if (colWrap) {
+        colWrap.addEventListener('mouseenter', () => { isHoveringColorWrap = true; });
+        colWrap.addEventListener('mouseleave', () => { isHoveringColorWrap = false; });
+        colWrap.addEventListener('touchstart', () => { isHoveringColorWrap = true; }, { passive: true });
+        colWrap.addEventListener('touchend', () => {
+          setTimeout(() => { isHoveringColorWrap = false; }, 1000);
+        }, { passive: true });
+      }
+
+      if (autoScrollAnimationId) {
+        cancelAnimationFrame(autoScrollAnimationId);
+      }
+
+      let lastTime = performance.now();
+      function autoScrollLoop(currentTime) {
+        const delta = currentTime - lastTime;
+        lastTime = currentTime;
+        const scrollStep = 0.5 * (delta / 16.67);
+
+        if (catWrap && !isHoveringCategoryWrap) {
+          if (catWrap.scrollWidth > catWrap.clientWidth) {
+            catWrap.scrollLeft += scrollStep;
+            if (catWrap.scrollLeft >= catWrap.scrollWidth - catWrap.clientWidth - 1) {
+              catWrap.scrollLeft = 0;
+            }
+          }
+        }
+
+        if (colWrap && !isHoveringColorWrap) {
+          if (colWrap.scrollWidth > colWrap.clientWidth) {
+            colWrap.scrollLeft += scrollStep;
+            if (colWrap.scrollLeft >= colWrap.scrollWidth - colWrap.clientWidth - 1) {
+              colWrap.scrollLeft = 0;
+            }
+          }
+        }
+
+        autoScrollAnimationId = requestAnimationFrame(autoScrollLoop);
+      }
+
+      autoScrollAnimationId = requestAnimationFrame(autoScrollLoop);
+    }
+
+    /* Top Custom Filter Dropdown Model for Dedicated Product View (user-product-view.hbs) */
+    function renderDropdownFilters() {
+      const typeSelect = document.getElementById('catalogTypeDropdown');
+      const colorSelect = document.getElementById('catalogColorDropdown');
+      const genderSelect = document.getElementById('catalogGenderDropdown');
+      const sortSelect = document.getElementById('catalogSortDropdown');
+      const modalSortSelect = document.getElementById('modalSortSelect');
+      const modalCategoryChips = document.getElementById('modalCategoryChips');
+      const modalColorChips = document.getElementById('modalColorChips');
+
+      if (!typeSelect && !modalCategoryChips) return;
+
+      const typeCounts = {};
+      state.products.forEach(p => {
+        const t = (p.type || '').trim();
+        if (t) typeCounts[t] = (typeCounts[t] || 0) + 1;
+      });
+      const uniqueTypes = Object.keys(typeCounts).sort();
+
+      const colorCounts = {};
+      state.products.forEach(p => {
+        if (Array.isArray(p.availableColours)) {
+          p.availableColours.forEach(c => {
+            const clean = (c || '').trim();
+            if (clean) colorCounts[clean] = (colorCounts[clean] || 0) + 1;
+          });
+        }
+      });
+      const uniqueColors = Object.keys(colorCounts).sort();
+
+      if (typeSelect) {
+        let typeOptionsHtml = `<option value="all">All Garment Types (${state.products.length})</option>`;
+        uniqueTypes.forEach(t => {
+          const isSelected = state.activeCategory.toLowerCase() === t.toLowerCase();
+          typeOptionsHtml += `<option value="${t}" ${isSelected ? 'selected' : ''}>${t} (${typeCounts[t]})</option>`;
+        });
+        typeSelect.innerHTML = typeOptionsHtml;
+        typeSelect.value = state.activeCategory;
+      }
+
+      if (colorSelect) {
+        let colorOptionsHtml = `<option value="all">All Colours Palette (${uniqueColors.length})</option>`;
+        uniqueColors.forEach(c => {
+          const isSelected = state.activeColor.toLowerCase() === c.toLowerCase();
+          colorOptionsHtml += `<option value="${c}" ${isSelected ? 'selected' : ''}>${c} (${colorCounts[c]})</option>`;
+        });
+        colorSelect.innerHTML = colorOptionsHtml;
+        colorSelect.value = state.activeColor;
+      }
+
+      if (genderSelect) {
+        genderSelect.value = state.activeGender;
+      }
+
+      if (sortSelect) {
+        sortSelect.value = state.sortBy;
+      }
+      if (modalSortSelect) {
+        modalSortSelect.value = state.sortBy;
+      }
+
+      if (modalCategoryChips) {
+        let chipsHtml = `
+          <button class="filter-chip ${state.activeCategory === 'all' ? 'active' : ''}" onclick="handleDropdownTypeChange('all');">
+            <span>All Garments (${state.products.length})</span>
+          </button>
+        `;
+        uniqueTypes.forEach(t => {
+          const isActive = state.activeCategory.toLowerCase() === t.toLowerCase();
+          chipsHtml += `
+            <button class="filter-chip ${isActive ? 'active' : ''}" onclick="handleDropdownTypeChange('${t.replace(/'/g, "\\'")}');">
+              <span>${t} (${typeCounts[t]})</span>
+            </button>
+          `;
+        });
+        modalCategoryChips.innerHTML = chipsHtml;
+      }
+
+      if (modalColorChips) {
+        let chipsHtml = `
+          <button class="filter-chip color-filter-chip ${state.activeColor === 'all' ? 'active' : ''}" onclick="handleDropdownColorChange('all');">
+            <span class="color-chip-swatch all-colors"></span>
+            <span>All Colours</span>
+          </button>
+        `;
+        uniqueColors.forEach(c => {
+          const isActive = state.activeColor.toLowerCase() === c.toLowerCase();
+          const swatchBg = getColorSwatchBg(c);
+          chipsHtml += `
+            <button class="filter-chip color-filter-chip ${isActive ? 'active' : ''}" onclick="handleDropdownColorChange('${c.replace(/'/g, "\\'")}');">
+              <span class="color-chip-swatch" style="background: ${swatchBg};"></span>
+              <span>${c} (${colorCounts[c]})</span>
+            </button>
+          `;
+        });
+        modalColorChips.innerHTML = chipsHtml;
+      }
+
+      updateActiveFilterTags();
+      lucide.createIcons();
+    }
+
+    function handleDropdownTypeChange(val) {
+      filterByType(val);
+    }
+
+    function handleDropdownColorChange(val) {
+      filterByColor(val);
+    }
+
+    function handleDropdownGenderChange(val) {
+      filterByGender(val);
+    }
+
+    function handleDropdownSortChange(val) {
+      state.sortBy = val;
+      const select = document.getElementById('catalogSortDropdown');
+      if (select) select.value = val;
+      const modalSelect = document.getElementById('modalSortSelect');
+      if (modalSelect) modalSelect.value = val;
+      const homeSelect = document.getElementById('sortSelect');
+      if (homeSelect) homeSelect.value = val;
+
+      state.displayedCount = 10;
+      applyFilters();
+      syncURLWithState();
+    }
+
+    function clearSearchInput() {
+      state.searchQuery = '';
+      const searchInput = document.getElementById('catalogSearchInput');
+      if (searchInput) searchInput.value = '';
+      const clearBtn = document.getElementById('searchClearBtn');
+      if (clearBtn) clearBtn.style.display = 'none';
+      state.displayedCount = 10;
+      applyFilters();
+      updateActiveFilterTags();
+      syncURLWithState();
+    }
+
+    function updateActiveFilterTags() {
+      const container = document.getElementById('activeFilterTagsBar');
+      if (!container) return;
+
+      const tags = [];
+
+      if (state.activeCategory && state.activeCategory !== 'all') {
+        tags.push({
+          label: `Type: ${state.activeCategory}`,
+          onRemove: "handleDropdownTypeChange('all')"
+        });
+      }
+
+      if (state.activeColor && state.activeColor !== 'all') {
+        tags.push({
+          label: `Colour: ${state.activeColor}`,
+          onRemove: "handleDropdownColorChange('all')"
+        });
+      }
+
+      if (state.activeGender && state.activeGender !== 'all') {
+        tags.push({
+          label: `Gender: ${state.activeGender}`,
+          onRemove: "handleDropdownGenderChange('all')"
+        });
+      }
+
+      if (state.searchQuery && state.searchQuery.trim()) {
+        tags.push({
+          label: `Search: "${state.searchQuery.trim()}"`,
+          onRemove: "clearSearchInput()"
+        });
+      }
+
+      if (tags.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let html = tags.map(tag => `
+        <span class="active-tag-chip">
+          <span>${tag.label}</span>
+          <i data-lucide="x" onclick="${tag.onRemove}" title="Remove filter"></i>
+        </span>
+      `).join('');
+
+      html += `
+        <button type="button" class="clear-all-tags-btn" onclick="resetFilters()">
+          Clear All Filters
+        </button>
+      `;
+
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function syncURLWithState() {
+      if (!state.isFullCatalog) return;
+      const url = new URL(window.location);
+
+      if (state.activeCategory && state.activeCategory !== 'all') {
+        url.searchParams.set('type', state.activeCategory);
+      } else {
+        url.searchParams.delete('type');
+        url.searchParams.delete('category');
+      }
+
+      if (state.activeColor && state.activeColor !== 'all') {
+        url.searchParams.set('color', state.activeColor);
+      } else {
+        url.searchParams.delete('color');
+        url.searchParams.delete('colour');
+      }
+
+      if (state.activeGender && state.activeGender !== 'all') {
+        url.searchParams.set('gender', state.activeGender);
+      } else {
+        url.searchParams.delete('gender');
+      }
+
+      if (state.searchQuery && state.searchQuery.trim()) {
+        url.searchParams.set('search', state.searchQuery.trim());
+      } else {
+        url.searchParams.delete('search');
+        url.searchParams.delete('q');
+      }
+
+      if (state.sortBy && state.sortBy !== 'newest') {
+        url.searchParams.set('sort', state.sortBy);
+      } else {
+        url.searchParams.delete('sort');
+      }
+
+      window.history.replaceState({}, '', url.pathname + url.search);
+    }
+
+    function updateCatalogPageTitles() {
+      const breadcrumbTag = document.getElementById('breadcrumbActiveTag');
+      const headerTitle = document.getElementById('catalogViewHeaderTitle');
+
+      if (breadcrumbTag) {
+        breadcrumbTag.innerText = state.activeCategory !== 'all' ? state.activeCategory : 'All Bespoke Garments';
+      }
+
+      if (headerTitle && state.activeCategory !== 'all') {
+        headerTitle.innerText = `${state.activeCategory} Atelier Collection`;
+      } else if (headerTitle) {
+        headerTitle.innerText = 'Curated Atelier Garment Catalog';
+      }
+    }
+
+    function openFilterModal() {
+      renderDropdownFilters();
+      openModal('filterModalOverlay');
+    }
+
+    function closeFilterModal() {
+      closeModal('filterModalOverlay');
     }
 
     function renderColorChips() {
@@ -519,8 +1064,15 @@
         if (link.innerText.toLowerCase().includes(gender)) link.classList.add('active');
         else link.classList.remove('active');
       });
+
+      const select = document.getElementById('catalogGenderDropdown');
+      if (select) select.value = gender;
+
       state.displayedCount = 10;
       applyFilters();
+      updateActiveFilterTags();
+      syncURLWithState();
+
       const catEl = document.getElementById('catalogSection');
       if (catEl && !state.isFullCatalog) catEl.scrollIntoView({ behavior: 'smooth' });
     }
@@ -531,11 +1083,21 @@
       const badge = document.getElementById('activeCategoryBadge');
       if (badge) badge.innerText = type === 'all' ? 'All Garments' : type;
 
+      document.querySelectorAll('#categoryCardsContainer .category-card').forEach(c => {
+        c.classList.toggle('active', (type === 'all' && c.innerText.includes('All Atelier Garments')) || c.innerText.toLowerCase().includes(type.toLowerCase()));
+      });
       document.querySelectorAll('#categoryChipsContainer .filter-chip').forEach(c => {
         c.classList.toggle('active', c.innerText.toLowerCase().includes(type.toLowerCase()) || (type === 'all' && c.innerText === 'All Garments'));
       });
+
+      const select = document.getElementById('catalogTypeDropdown');
+      if (select) select.value = type;
+
+      updateCatalogPageTitles();
       state.displayedCount = 10;
       applyFilters();
+      updateActiveFilterTags();
+      syncURLWithState();
     }
 
     function filterByColor(color, e) {
@@ -544,15 +1106,31 @@
       const badge = document.getElementById('activeColorBadge');
       if (badge) badge.innerText = color === 'all' ? 'All Colours' : color;
 
+      document.querySelectorAll('#colorCardsContainer .color-card').forEach(c => {
+        c.classList.toggle('active', (color === 'all' && c.innerText.includes('All Colours')) || c.innerText.toLowerCase().includes(color.toLowerCase()));
+      });
+
+      const select = document.getElementById('catalogColorDropdown');
+      if (select) select.value = color;
+
       renderColorChips();
       state.displayedCount = 10;
       applyFilters();
+      updateActiveFilterTags();
+      syncURLWithState();
     }
 
     function handleSearchInput() {
-      state.searchQuery = document.getElementById('catalogSearchInput').value;
+      const inp = document.getElementById('catalogSearchInput');
+      state.searchQuery = inp ? inp.value : '';
+      const clearBtn = document.getElementById('searchClearBtn');
+      if (clearBtn) {
+        clearBtn.style.display = state.searchQuery.trim() ? 'flex' : 'none';
+      }
       state.displayedCount = 10;
       applyFilters();
+      updateActiveFilterTags();
+      syncURLWithState();
     }
 
     function focusSearch() {
@@ -564,9 +1142,12 @@
     }
 
     function handleSortChange() {
-      state.sortBy = document.getElementById('sortSelect').value;
+      const homeSelect = document.getElementById('sortSelect');
+      const catalogSelect = document.getElementById('catalogSortDropdown');
+      state.sortBy = (homeSelect && homeSelect.value) || (catalogSelect && catalogSelect.value) || 'newest';
       state.displayedCount = 10;
       applyFilters();
+      syncURLWithState();
     }
 
     function resetFilters() {
@@ -575,16 +1156,35 @@
       state.activeColor = 'all';
       state.searchQuery = '';
       state.displayedCount = 10;
+
       const inp = document.getElementById('catalogSearchInput');
       if (inp) inp.value = '';
+      const clearBtn = document.getElementById('searchClearBtn');
+      if (clearBtn) clearBtn.style.display = 'none';
+
       const catBadge = document.getElementById('activeCategoryBadge');
       if (catBadge) catBadge.innerText = 'All Garments';
       const colBadge = document.getElementById('activeColorBadge');
       if (colBadge) colBadge.innerText = 'All Colours';
+
+      const typeDropdown = document.getElementById('catalogTypeDropdown');
+      if (typeDropdown) typeDropdown.value = 'all';
+      const colDropdown = document.getElementById('catalogColorDropdown');
+      if (colDropdown) colDropdown.value = 'all';
+      const genDropdown = document.getElementById('catalogGenderDropdown');
+      if (genDropdown) genDropdown.value = 'all';
+
       document.querySelectorAll('.gender-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
+      document.querySelectorAll('.category-card').forEach((c, i) => c.classList.toggle('active', i === 0));
+      document.querySelectorAll('.color-card').forEach((c, i) => c.classList.toggle('active', i === 0));
       document.querySelectorAll('#categoryChipsContainer .filter-chip').forEach((c, i) => c.classList.toggle('active', i === 0));
+
       renderColorChips();
+      renderDropdownFilters();
+      updateCatalogPageTitles();
       applyFilters();
+      updateActiveFilterTags();
+      syncURLWithState();
     }
 
     /* =========================================================================
