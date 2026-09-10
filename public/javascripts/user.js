@@ -18,8 +18,13 @@
       user: null, // Populated via /api/user/me
       activeGender: 'all',
       activeCategory: 'all',
+      activeColor: 'all',
       searchQuery: '',
       sortBy: 'newest',
+      displayedCount: 10,
+      pageSize: 10,
+      isFullCatalog: window.location.pathname.includes('/products') || window.location.search.includes('view=all'),
+      isLoadingMore: false,
       selectedProduct: null,
       selectedSize: 'M',
       selectedColor: '',
@@ -38,6 +43,49 @@
       { size: 'XXL', chestCm: '128', shoulderCm: '52', lengthCm: '162', sleeveCm: '68', chestIn: '50.5', shoulderIn: '20.5', lengthIn: '64', sleeveIn: '27' }
     ];
 
+    /* Luxury Color Swatch Palette Map */
+    const COLOR_PALETTE_MAP = {
+      'pure white': '#ffffff',
+      'crisp white': '#ffffff',
+      'ivory': '#fffff0',
+      'cream': '#fffdd0',
+      'sand': '#d2b48c',
+      'desert sand': '#edc9af',
+      'desert taupe': '#b38b6d',
+      'sand dune': '#e3dac9',
+      'warm sand': '#e8d8b8',
+      'warm taupe': '#b38b6d',
+      'charcoal': '#36454f',
+      'slate': '#708090',
+      'slate grey': '#708090',
+      'stone grey': '#928e85',
+      'obsidian black': '#0b0b0b',
+      'onyx': '#0f0f0f',
+      'onyx black': '#0f0f0f',
+      'black': '#000000',
+      'midnight blue': '#191970',
+      'deep navy': '#000080',
+      'royal navy': '#0a1172',
+      'sapphire': '#0f52ba',
+      'ice blue': '#afdbf5',
+      'emerald green': '#046307',
+      'olive ash': '#556b2f',
+      'royal plum': '#4b0082',
+      'dark maroon': '#480607',
+      'dusty rose': '#dcae96',
+      'gold ochre': '#cc7722',
+      'champagne gold': '#fad6a5',
+      'pearl white': '#eae6df',
+      'burgundy': '#800020'
+    };
+
+    function getColorSwatchBg(colorName) {
+      const clean = (colorName || '').trim().toLowerCase();
+      return COLOR_PALETTE_MAP[clean] || '#d4af37';
+    }
+
+    let scrollObserver = null;
+
     /* =========================================================================
        INITIALIZATION
        ========================================================================= */
@@ -52,6 +100,13 @@
         checkUserSession(),
         fetchProducts()
       ]);
+
+      if (state.isFullCatalog) {
+        setTimeout(() => {
+          const catEl = document.getElementById('catalogSection');
+          if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+      }
     });
 
     /* =========================================================================
@@ -190,7 +245,7 @@
     }
 
     /* =========================================================================
-       PRODUCTS CATALOG FETCH & RENDER
+       PRODUCTS CATALOG FETCH & DUAL FILTERING (TYPE & COLOUR)
        ========================================================================= */
     async function fetchProducts() {
       try {
@@ -198,11 +253,48 @@
         const data = await res.json();
         if (data.success && Array.isArray(data.products)) {
           state.products = data.products;
+          renderColorChips();
           applyFilters();
         }
       } catch (err) {
         console.error('Fetch Products Error:', err);
       }
+    }
+
+    function renderColorChips() {
+      const container = document.getElementById('colorChipsContainer');
+      if (!container) return;
+
+      const colorsSet = new Set();
+      state.products.forEach(p => {
+        if (Array.isArray(p.availableColours)) {
+          p.availableColours.forEach(c => {
+            if (c && c.trim()) colorsSet.add(c.trim());
+          });
+        }
+      });
+
+      const uniqueColors = Array.from(colorsSet).sort();
+
+      let html = `
+        <button class="filter-chip color-filter-chip ${state.activeColor === 'all' ? 'active' : ''}" onclick="filterByColor('all', event)">
+          <span class="color-chip-swatch all-colors"></span>
+          <span>All Colours</span>
+        </button>
+      `;
+
+      uniqueColors.forEach(col => {
+        const swatchBg = getColorSwatchBg(col);
+        const isActive = state.activeColor.toLowerCase() === col.toLowerCase();
+        html += `
+          <button class="filter-chip color-filter-chip ${isActive ? 'active' : ''}" onclick="filterByColor('${col.replace(/'/g, "\\'")}', event)">
+            <span class="color-chip-swatch" style="background: ${swatchBg};"></span>
+            <span>${col}</span>
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
     }
 
     function applyFilters() {
@@ -213,9 +305,17 @@
         list = list.filter(p => p.gender === state.activeGender || p.gender === 'unisex');
       }
 
-      // Category filter
+      // Category / Type filter (Part 1)
       if (state.activeCategory !== 'all') {
         list = list.filter(p => (p.type || '').toLowerCase() === state.activeCategory.toLowerCase());
+      }
+
+      // Colour filter (Part 2)
+      if (state.activeColor !== 'all') {
+        list = list.filter(p => {
+          if (!Array.isArray(p.availableColours)) return false;
+          return p.availableColours.some(c => c.toLowerCase() === state.activeColor.toLowerCase());
+        });
       }
 
       // Search filter
@@ -224,7 +324,8 @@
         list = list.filter(p =>
           (p.name || '').toLowerCase().includes(q) ||
           (p.type || '').toLowerCase().includes(q) ||
-          (p.description || '').toLowerCase().includes(q)
+          (p.description || '').toLowerCase().includes(q) ||
+          (Array.isArray(p.availableColours) && p.availableColours.some(c => c.toLowerCase().includes(q)))
         );
       }
 
@@ -241,29 +342,39 @@
       renderProductsGrid();
     }
 
+    /* =========================================================================
+       PRODUCTS GRID RENDER, 10 INITIAL LOAD & PROGRESSIVE SCROLL
+       ========================================================================= */
     function renderProductsGrid() {
       const container = document.getElementById('productsGridContainer');
       const subtitle = document.getElementById('productCountSubtitle');
       if (!container) return;
 
+      const totalMatches = state.filteredProducts.length;
+      const itemsToDisplay = state.filteredProducts.slice(0, state.displayedCount);
+
       if (subtitle) {
-        subtitle.innerText = `Displaying ${state.filteredProducts.length} master bespoke garment${state.filteredProducts.length === 1 ? '' : 's'}`;
+        subtitle.innerText = `Displaying ${itemsToDisplay.length} of ${totalMatches} master bespoke garment${totalMatches === 1 ? '' : 's'}`;
       }
 
-      if (state.filteredProducts.length === 0) {
+      if (totalMatches === 0) {
         container.innerHTML = `
           <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-dim);">
             <i data-lucide="search-x" style="width: 44px; height: 44px; margin: 0 auto 12px;"></i>
             <h3 class="font-serif" style="font-size: 1.6rem; color: var(--text-main); margin-bottom: 6px;">No Garments Matched</h3>
-            <p style="font-size: 0.85rem;">Try adjusting your filters, category, or search keywords.</p>
+            <p style="font-size: 0.85rem;">Try adjusting your type/category, colour, or search keywords.</p>
             <button class="btn-gold" style="margin-top: 16px;" onclick="resetFilters()">Reset All Filters</button>
           </div>
         `;
+        const loader = document.getElementById('catalogLoadingIndicator');
+        const exploreContainer = document.getElementById('exploreMoreContainer');
+        if (loader) loader.style.display = 'none';
+        if (exploreContainer) exploreContainer.style.display = 'none';
         lucide.createIcons();
         return;
       }
 
-      container.innerHTML = state.filteredProducts.map(product => {
+      container.innerHTML = itemsToDisplay.map(product => {
         const frontImg = product.frontImage || '/logo-white.png';
         const backImg = product.backImage || product.frontImage || '/logo-white.png';
         const formattedPrice = formatPrice(product.price);
@@ -328,6 +439,73 @@
       }).join('');
 
       lucide.createIcons();
+      setupInfiniteScroll();
+    }
+
+    /* Infinite Scroll & Explore More Handler */
+    function setupInfiniteScroll() {
+      const footerAction = document.getElementById('catalogFooterAction');
+      const loader = document.getElementById('catalogLoadingIndicator');
+      const exploreContainer = document.getElementById('exploreMoreContainer');
+      if (!footerAction) return;
+
+      const totalMatches = state.filteredProducts.length;
+
+      // On home page: initial load 10 -> scroll loads up to 20 -> then show 'Explore More' button
+      if (!state.isFullCatalog) {
+        if (state.displayedCount >= 20 && totalMatches > 20) {
+          if (loader) loader.style.display = 'none';
+          if (exploreContainer) exploreContainer.style.display = 'block';
+          if (scrollObserver) scrollObserver.disconnect();
+          return;
+        } else {
+          if (exploreContainer) exploreContainer.style.display = 'none';
+        }
+      } else {
+        // On full catalog page (/products): smoothly infinite scroll all
+        if (exploreContainer) exploreContainer.style.display = 'none';
+      }
+
+      if (state.displayedCount >= totalMatches) {
+        if (loader) loader.style.display = 'none';
+        if (scrollObserver) scrollObserver.disconnect();
+        return;
+      }
+
+      if (scrollObserver) scrollObserver.disconnect();
+
+      scrollObserver = new IntersectionObserver(entries => {
+        const entry = entries[0];
+        if (entry.isIntersecting && !state.isLoadingMore) {
+          loadMoreProducts();
+        }
+      }, { rootMargin: '250px' });
+
+      scrollObserver.observe(footerAction);
+    }
+
+    function loadMoreProducts() {
+      const totalMatches = state.filteredProducts.length;
+      if (state.displayedCount >= totalMatches || state.isLoadingMore) return;
+
+      if (!state.isFullCatalog && state.displayedCount >= 20) {
+        return;
+      }
+
+      state.isLoadingMore = true;
+      const loader = document.getElementById('catalogLoadingIndicator');
+      if (loader) loader.style.display = 'flex';
+
+      setTimeout(() => {
+        state.displayedCount += state.pageSize;
+        state.isLoadingMore = false;
+        renderProductsGrid();
+      }, 250);
+    }
+
+    function goToFullCatalog(e) {
+      if (e) e.preventDefault();
+      window.location.href = '/products';
     }
 
     /* Filter Handlers */
@@ -341,22 +519,39 @@
         if (link.innerText.toLowerCase().includes(gender)) link.classList.add('active');
         else link.classList.remove('active');
       });
+      state.displayedCount = 10;
       applyFilters();
       const catEl = document.getElementById('catalogSection');
-      if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
+      if (catEl && !state.isFullCatalog) catEl.scrollIntoView({ behavior: 'smooth' });
     }
 
     function filterByType(type, e) {
       if (e) e.preventDefault();
       state.activeCategory = type;
-      document.querySelectorAll('.filter-chip').forEach(c => {
+      const badge = document.getElementById('activeCategoryBadge');
+      if (badge) badge.innerText = type === 'all' ? 'All Garments' : type;
+
+      document.querySelectorAll('#categoryChipsContainer .filter-chip').forEach(c => {
         c.classList.toggle('active', c.innerText.toLowerCase().includes(type.toLowerCase()) || (type === 'all' && c.innerText === 'All Garments'));
       });
+      state.displayedCount = 10;
+      applyFilters();
+    }
+
+    function filterByColor(color, e) {
+      if (e) e.preventDefault();
+      state.activeColor = color;
+      const badge = document.getElementById('activeColorBadge');
+      if (badge) badge.innerText = color === 'all' ? 'All Colours' : color;
+
+      renderColorChips();
+      state.displayedCount = 10;
       applyFilters();
     }
 
     function handleSearchInput() {
       state.searchQuery = document.getElementById('catalogSearchInput').value;
+      state.displayedCount = 10;
       applyFilters();
     }
 
@@ -370,17 +565,25 @@
 
     function handleSortChange() {
       state.sortBy = document.getElementById('sortSelect').value;
+      state.displayedCount = 10;
       applyFilters();
     }
 
     function resetFilters() {
       state.activeGender = 'all';
       state.activeCategory = 'all';
+      state.activeColor = 'all';
       state.searchQuery = '';
+      state.displayedCount = 10;
       const inp = document.getElementById('catalogSearchInput');
       if (inp) inp.value = '';
+      const catBadge = document.getElementById('activeCategoryBadge');
+      if (catBadge) catBadge.innerText = 'All Garments';
+      const colBadge = document.getElementById('activeColorBadge');
+      if (colBadge) colBadge.innerText = 'All Colours';
       document.querySelectorAll('.gender-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
-      document.querySelectorAll('.filter-chip').forEach((c, i) => c.classList.toggle('active', i === 0));
+      document.querySelectorAll('#categoryChipsContainer .filter-chip').forEach((c, i) => c.classList.toggle('active', i === 0));
+      renderColorChips();
       applyFilters();
     }
 
@@ -1294,7 +1497,9 @@
     function toggleMobileNav() {
       const overlay = document.getElementById('mobileNavOverlay');
       if (overlay) {
-        overlay.classList.toggle('active');
+        const isActive = overlay.classList.toggle('active');
+        document.body.style.overflow = isActive ? 'hidden' : '';
+        lucide.createIcons();
       }
     }
 

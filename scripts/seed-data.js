@@ -17,10 +17,10 @@ async function seed() {
   await db.connectDB();
   console.log('Seeding Qalidotae database...');
 
-  // 1. Seed Products if empty or < 5
+  // 1. Seed Products if empty or < 20
   var productCount = await db.Product.countDocuments();
-  if (productCount === 0) {
-    console.log('Seeding products...');
+  if (productCount < 20) {
+    console.log('Seeding products (25 luxury items)...');
     var sampleProducts = [
       {
         name: 'The Royal Emirati Thobe',
@@ -157,15 +157,228 @@ async function seed() {
         gender: 'women',
         archive: false,
         isAvailable: true,
-        availableColours: ['Onyx', 'Dark Maroon'],
+        availableColours: ['Onyx Black', 'Dark Maroon'],
         totalStock: 14,
         availableSizes: ['S', 'M', 'L', 'XL', 'XXL'],
         description: 'Hand-sewn micro-sequin florals along sleeve cuffs and hemline.'
+      },
+      {
+        name: 'The Crown Prince Royal Thobe',
+        price: 850,
+        frontImage: createSampleImage('Crown Prince Thobe', '#11141a', '#d4af37'),
+        backImage: createSampleImage('Crown Prince Back', '#151921', '#d4af37'),
+        type: 'Emirati Thobe',
+        gender: 'men',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Pure White', 'Ivory', 'Gold Ochre'],
+        totalStock: 20,
+        availableSizes: ['S', 'M', 'L', 'XL', 'XXL'],
+        description: 'Triple-spun Toyobo Japanese crepe with handcrafted 24K gold thread collar.'
+      },
+      {
+        name: 'Majestic Atlas Hooded Djellaba',
+        price: 690,
+        frontImage: createSampleImage('Atlas Djellaba', '#14181f', '#e2d9c8'),
+        backImage: createSampleImage('Atlas Djellaba Back', '#181d26', '#e2d9c8'),
+        type: 'Moroccan Hooded Thobe',
+        gender: 'men',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Deep Navy', 'Stone Grey', 'Charcoal'],
+        totalStock: 16,
+        availableSizes: ['M', 'L', 'XL'],
+        description: 'Heavyweight handwoven wool blend with traditional sfifa braiding.'
+      },
+      {
+        name: 'Al Rawda Silk Organza Abaya',
+        price: 940,
+        frontImage: createSampleImage('Rawda Silk Abaya', '#0d0d12', '#d4af37'),
+        backImage: createSampleImage('Rawda Silk Back', '#13131a', '#d4af37'),
+        type: 'Abaya',
+        gender: 'women',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Onyx Black', 'Emerald Green', 'Champagne Gold'],
+        totalStock: 10,
+        availableSizes: ['XS', 'S', 'M', 'L'],
+        description: 'Layered silk organza featuring hand-embroidered Islamic geometric motifs.'
+      },
+      {
+        name: 'Riyadh Executive Collared Thobe',
+        price: 540,
+        frontImage: createSampleImage('Riyadh Executive', '#1a1a1e', '#e2d9c8'),
+        backImage: createSampleImage('Riyadh Executive Back', '#202026', '#e2d9c8'),
+        type: 'Saudi Thobe',
+        gender: 'men',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Crisp White', 'Cream', 'Slate Grey'],
+        totalStock: 30,
+        availableSizes: ['S', 'M', 'L', 'XL', 'XXL'],
+        description: 'Crisp pressed finish with stiffened collar and concealed French cuffs.'
+      },
+      {
+        name: 'Yasmina Beaded Royal Kaftan',
+        price: 980,
+        frontImage: createSampleImage('Yasmina Kaftan', '#1f1614', '#d4af37'),
+        backImage: createSampleImage('Yasmina Kaftan Back', '#261b19', '#d4af37'),
+        type: 'Kaftan',
+        gender: 'women',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Sapphire', 'Royal Plum', 'Pearl White'],
+        totalStock: 9,
+        availableSizes: ['S', 'M', 'L', 'XL'],
+        description: 'Hand-encrusted Swarovski crystal waist adornment on pure mulberry silk.'
+      },
+      {
+        name: 'Medina Linen Lounging Set',
+        price: 390,
+        frontImage: createSampleImage('Medina Loungewear', '#191b1a', '#c5c1b9'),
+        backImage: createSampleImage('Medina Loungewear Back', '#1e211f', '#c5c1b9'),
+        type: 'Arabic Nightwear',
+        gender: 'men',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Desert Taupe', 'Ice Blue', 'Warm Sand'],
+        totalStock: 24,
+        availableSizes: ['M', 'L', 'XL', 'XXL'],
+        description: 'Garment-washed breathable linen designed for warm evenings.'
+      },
+      {
+        name: 'Al Thuraya Golden Jalabiya',
+        price: 740,
+        frontImage: createSampleImage('Thuraya Jalabiya', '#211b15', '#d4af37'),
+        backImage: createSampleImage('Thuraya Back', '#29221a', '#d4af37'),
+        type: 'Jalabiya',
+        gender: 'women',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Gold Ochre', 'Dusty Rose', 'Sand Dune'],
+        totalStock: 14,
+        availableSizes: ['S', 'M', 'L', 'XL'],
+        description: 'Intricate zardozi bullion embroidery around chest and bell cuffs.'
+      },
+      {
+        name: 'Dubai Midnight Edition Thobe',
+        price: 590,
+        frontImage: createSampleImage('Dubai Midnight', '#121215', '#d4af37'),
+        backImage: createSampleImage('Dubai Midnight Back', '#16161c', '#d4af37'),
+        type: 'Emirati Thobe',
+        gender: 'men',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Obsidian Black', 'Midnight Blue', 'Charcoal'],
+        totalStock: 19,
+        availableSizes: ['S', 'M', 'L', 'XL', 'XXL'],
+        description: 'Matte dark aesthetic with tonal silk tarboosh and contrast stitching.'
+      },
+      {
+        name: 'Sahara Nomadic Hooded Cloak',
+        price: 660,
+        frontImage: createSampleImage('Sahara Cloak', '#1c1815', '#e2d9c8'),
+        backImage: createSampleImage('Sahara Cloak Back', '#231e1a', '#e2d9c8'),
+        type: 'Moroccan Hooded Thobe',
+        gender: 'men',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Desert Sand', 'Sand Dune', 'Warm Taupe'],
+        totalStock: 15,
+        availableSizes: ['M', 'L', 'XL'],
+        description: 'Heritage North African drape featuring brushed camel hair blend.'
+      },
+      {
+        name: 'Qamar Pleated Satin Abaya',
+        price: 810,
+        frontImage: createSampleImage('Qamar Pleated Abaya', '#101014', '#e2d9c8'),
+        backImage: createSampleImage('Qamar Pleated Back', '#14141a', '#e2d9c8'),
+        type: 'Abaya',
+        gender: 'women',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Dark Maroon', 'Onyx Black', 'Deep Navy'],
+        totalStock: 11,
+        availableSizes: ['S', 'M', 'L', 'XL'],
+        description: 'Precision sunburst accordion pleats with magnetic snap cuffs.'
+      },
+      {
+        name: 'The Sultan Ceremonial Bisht Thobe',
+        price: 1150,
+        frontImage: createSampleImage('Sultan Bisht Thobe', '#14110f', '#d4af37'),
+        backImage: createSampleImage('Sultan Bisht Back', '#1b1714', '#d4af37'),
+        type: 'Saudi Thobe',
+        gender: 'men',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Pure White', 'Ivory', 'Crisp White'],
+        totalStock: 7,
+        availableSizes: ['M', 'L', 'XL', 'XXL'],
+        description: 'Master ceremonial pairing with woven gold zari border trim.'
+      },
+      {
+        name: 'Jawahir Silk Brocade Kaftan',
+        price: 920,
+        frontImage: createSampleImage('Jawahir Brocade', '#1e1315', '#d4af37'),
+        backImage: createSampleImage('Jawahir Brocade Back', '#26181b', '#d4af37'),
+        type: 'Kaftan',
+        gender: 'women',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Royal Plum', 'Champagne Gold', 'Sapphire'],
+        totalStock: 12,
+        availableSizes: ['S', 'M', 'L', 'XL'],
+        description: 'Damascus jacquard brocade with detachable silk tassel belt.'
+      },
+      {
+        name: 'Al Diwan Luxury Loungewear Thobe',
+        price: 360,
+        frontImage: createSampleImage('Al Diwan Loungewear', '#15171a', '#e2d9c8'),
+        backImage: createSampleImage('Al Diwan Back', '#1a1d21', '#e2d9c8'),
+        type: 'Arabic Nightwear',
+        gender: 'men',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Stone Grey', 'Slate Grey', 'Ice Blue'],
+        totalStock: 28,
+        availableSizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+        description: 'Featherlight modal-cotton blend crafted for ultimate home elegance.'
+      },
+      {
+        name: 'Nouf Artisanal Tasseled Jalabiya',
+        price: 680,
+        frontImage: createSampleImage('Nouf Jalabiya', '#1d1519', '#d4af37'),
+        backImage: createSampleImage('Nouf Jalabiya Back', '#241a20', '#d4af37'),
+        type: 'Jalabiya',
+        gender: 'women',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Emerald Green', 'Gold Ochre', 'Dusty Rose'],
+        totalStock: 17,
+        availableSizes: ['S', 'M', 'L', 'XL'],
+        description: 'Rich hand-dyed viscose weave embellished with antique brass beads.'
+      },
+      {
+        name: 'The Pearl of Kuwait Thobe',
+        price: 570,
+        frontImage: createSampleImage('Kuwait Pearl Thobe', '#17181a', '#e2d9c8'),
+        backImage: createSampleImage('Kuwait Pearl Back', '#1c1e21', '#e2d9c8'),
+        type: 'Emirati Thobe',
+        gender: 'men',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Cream', 'Pure White', 'Ivory'],
+        totalStock: 25,
+        availableSizes: ['S', 'M', 'L', 'XL', 'XXL'],
+        description: 'Subtle luster spun fabric engineered for warm Gulf climates.'
       }
     ];
 
-    await db.Product.insertMany(sampleProducts);
-    console.log('✅ Seeded 10 Products in PRODUCTS');
+    if (productCount < 20) {
+      await db.Product.deleteMany({});
+      await db.Product.insertMany(sampleProducts);
+      console.log('✅ Seeded 25 Luxury Products in PRODUCTS');
+    }
   }
 
   // 2. Seed Users in USERSDETALIS

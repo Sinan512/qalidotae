@@ -83,32 +83,54 @@
   </header>
 
   <!-- MOBILE NAVIGATION DRAWER -->
-  <div class="cart-drawer-overlay" id="mobileNavOverlay" onclick="toggleMobileNav()">
-    <div class="cart-drawer" style="left: 0; right: auto; transform: translateX(-100%);" onclick="event.stopPropagation()">
+  <div class="cart-drawer-overlay mobile-drawer-overlay" id="mobileNavOverlay" onclick="toggleMobileNav()">
+    <aside class="mobile-nav-drawer" onclick="event.stopPropagation()" aria-label="Mobile Navigation">
       <div class="cart-header">
         <div class="brand-logo-wrap">
           <img src="/logo-white.png" alt="Qalidotae" class="brand-logo-img" id="mobileDrawerLogoImg" style="height: 38px;" />
         </div>
-        <button class="modal-close-btn" style="position: static;" onclick="toggleMobileNav()">
+        <button class="modal-close-btn" style="position: static;" onclick="toggleMobileNav()" aria-label="Close menu">
           <i data-lucide="x"></i>
         </button>
       </div>
-      <div class="cart-items-list" style="gap: 20px; padding: 24px;">
-        <a href="#" class="nav-link" onclick="filterByGender('all', event); toggleMobileNav();">All Collections</a>
-        <a href="#" class="nav-link" onclick="filterByGender('men', event); toggleMobileNav();">Men's Luxury Thobes</a>
-        <a href="#" class="nav-link" onclick="filterByGender('women', event); toggleMobileNav();">Women's Abayas & Kaftans</a>
-        <a href="#" class="nav-link" onclick="openTrackOrderModal(event); toggleMobileNav();">Track Order Status</a>
-        <div style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 10px;">
-          <div style="font-size: 0.8rem; color: var(--gold-primary); font-weight: 600; margin-bottom: 10px;">PREFERENCES</div>
-          <button class="btn-outline" style="width: 100%; justify-content: center; display: flex; gap: 8px; margin-bottom: 10px;" onclick="openCurrencyModal()">
-            <i data-lucide="globe"></i> Change Currency (<span id="mobileCurrencyText">AED</span>)
+      <div class="mobile-nav-content">
+        <div class="mobile-nav-group">
+          <div class="mobile-nav-label">ATELIER NAVIGATION</div>
+          <a href="/" class="mobile-nav-link active" onclick="filterByGender('all', event); toggleMobileNav();">
+            <i data-lucide="sparkles"></i>
+            <span>All Collections</span>
+          </a>
+          <a href="#" class="mobile-nav-link" onclick="filterByGender('men', event); toggleMobileNav();">
+            <i data-lucide="user"></i>
+            <span>Men's Luxury Thobes</span>
+          </a>
+          <a href="#" class="mobile-nav-link" onclick="filterByGender('women', event); toggleMobileNav();">
+            <i data-lucide="heart"></i>
+            <span>Women's Abayas & Kaftans</span>
+          </a>
+          <a href="/products" class="mobile-nav-link" onclick="toggleMobileNav();">
+            <i data-lucide="grid"></i>
+            <span>Full Garment Catalog</span>
+          </a>
+          <a href="#" class="mobile-nav-link" onclick="openTrackOrderModal(event); toggleMobileNav();">
+            <i data-lucide="truck"></i>
+            <span>Track Order Status</span>
+          </a>
+        </div>
+
+        <div class="mobile-nav-preferences">
+          <div class="mobile-nav-label">PREFERENCES</div>
+          <button class="btn-outline mobile-pref-btn" onclick="openCurrencyModal()">
+            <i data-lucide="globe"></i>
+            <span>Currency: <strong id="mobileCurrencyText">AED</strong></span>
           </button>
-          <button class="btn-outline" style="width: 100%; justify-content: center; display: flex; gap: 8px;" onclick="toggleTheme()">
-            <i data-lucide="moon"></i> Toggle Theme
+          <button class="btn-outline mobile-pref-btn" onclick="toggleTheme()">
+            <i data-lucide="moon"></i>
+            <span>Toggle Theme</span>
           </button>
         </div>
       </div>
-    </div>
+    </aside>
   </div>
 
   <!-- 3. HERO EDITORIAL SECTION -->
@@ -173,7 +195,7 @@
       </div>
     </div>
 
-    <!-- Controls: Gender tabs, Search, Sort, Categories -->
+    <!-- Controls: Gender tabs, Search, Sort, Type & Colour Dual Filters -->
     <div class="catalog-controls">
       <div class="controls-top-row">
         <div class="gender-tabs">
@@ -196,16 +218,43 @@
         </div>
       </div>
 
-      <!-- Type Filter Chips -->
-      <div class="category-filter-chips" id="categoryChipsContainer">
-        <button class="filter-chip active" onclick="filterByType('all', event)">All Garments</button>
-        <button class="filter-chip" onclick="filterByType('Emirati Thobe', event)">Emirati Thobes</button>
-        <button class="filter-chip" onclick="filterByType('Moroccan Hooded Thobe', event)">Moroccan Hooded</button>
-        <button class="filter-chip" onclick="filterByType('Saudi Thobe', event)">Saudi Classic</button>
-        <button class="filter-chip" onclick="filterByType('Abaya', event)">Haute Abayas</button>
-        <button class="filter-chip" onclick="filterByType('Jalabiya', event)">Jalabiyas</button>
-        <button class="filter-chip" onclick="filterByType('Kaftan', event)">Silk Kaftans</button>
-        <button class="filter-chip" onclick="filterByType('Arabic Nightwear', event)">Heritage Loungewear</button>
+      <!-- Part 1: Shop by Type / Categories -->
+      <div class="filter-part-block">
+        <div class="filter-part-header">
+          <div class="filter-part-title">
+            <i data-lucide="layout-grid" style="width: 14px; height: 14px; color: var(--gold-primary);"></i>
+            <span>Shop by Type / Categories</span>
+          </div>
+          <span class="filter-part-active-badge" id="activeCategoryBadge">All Garments</span>
+        </div>
+        <div class="category-filter-chips" id="categoryChipsContainer">
+          <button class="filter-chip active" onclick="filterByType('all', event)">All Garments</button>
+          <button class="filter-chip" onclick="filterByType('Emirati Thobe', event)">Emirati Thobes</button>
+          <button class="filter-chip" onclick="filterByType('Moroccan Hooded Thobe', event)">Moroccan Hooded</button>
+          <button class="filter-chip" onclick="filterByType('Saudi Thobe', event)">Saudi Classic</button>
+          <button class="filter-chip" onclick="filterByType('Abaya', event)">Haute Abayas</button>
+          <button class="filter-chip" onclick="filterByType('Jalabiya', event)">Jalabiyas</button>
+          <button class="filter-chip" onclick="filterByType('Kaftan', event)">Silk Kaftans</button>
+          <button class="filter-chip" onclick="filterByType('Arabic Nightwear', event)">Heritage Loungewear</button>
+        </div>
+      </div>
+
+      <!-- Part 2: Shop by Colour -->
+      <div class="filter-part-block">
+        <div class="filter-part-header">
+          <div class="filter-part-title">
+            <i data-lucide="palette" style="width: 14px; height: 14px; color: var(--gold-primary);"></i>
+            <span>Shop by Colour</span>
+          </div>
+          <span class="filter-part-active-badge" id="activeColorBadge">All Colours</span>
+        </div>
+        <div class="color-filter-chips" id="colorChipsContainer">
+          <!-- Dynamically populated with color indicator swatches -->
+          <button class="filter-chip color-filter-chip active" onclick="filterByColor('all', event)">
+            <span class="color-chip-swatch all-colors"></span>
+            <span>All Colours</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -215,6 +264,20 @@
       <div style="grid-column: 1 / -1; text-align: center; padding: 60px 0; color: var(--text-dim);">
         <i data-lucide="loader-2" class="spin" style="width: 32px; height: 32px; margin: 0 auto 12px;"></i>
         <div>Fetching master atelier creations...</div>
+      </div>
+    </div>
+
+    <!-- Progressive Load Sentinel & Explore More Action Button -->
+    <div id="catalogFooterAction" class="catalog-footer-action">
+      <div id="catalogLoadingIndicator" class="catalog-scroll-loader" style="display: none;">
+        <i data-lucide="loader-2" class="spin" style="width: 20px; height: 20px; color: var(--gold-primary);"></i>
+        <span>Revealing more atelier creations...</span>
+      </div>
+      <div id="exploreMoreContainer" class="explore-more-container" style="display: none;">
+        <a href="/products" class="btn-gold explore-more-btn" onclick="goToFullCatalog(event)">
+          <span>Explore More Creations</span>
+          <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+        </a>
       </div>
     </div>
 
