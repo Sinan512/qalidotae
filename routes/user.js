@@ -154,6 +154,29 @@ router.get('/', optionalUserAuth, function (req, res, next) {
   res.render('user', {
     layout: false,
     title: 'Qalidotae — Luxury Arabic Fashion & Atelier',
+    isFullCatalog: false,
+    user: req.user ? {
+      id: req.user._id,
+      fullName: req.user.fullName,
+      email: req.user.email,
+      gender: req.user.gender,
+      phoneNumber: req.user.phoneNumber,
+      city: req.user.city,
+      country: req.user.country
+    } : null
+  });
+});
+
+router.get(['/products', '/user-product-view'], optionalUserAuth, function (req, res, next) {
+  res.render('user-product-view', {
+    layout: false,
+    title: 'Curated Atelier Garment Catalog — Qalidotae',
+    isFullCatalog: true,
+    initialType: req.query.type || 'all',
+    initialColor: req.query.color || 'all',
+    initialGender: req.query.gender || 'all',
+    initialSearch: req.query.search || '',
+    initialSort: req.query.sort || 'newest',
     user: req.user ? {
       id: req.user._id,
       fullName: req.user.fullName,

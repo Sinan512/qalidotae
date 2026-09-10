@@ -18,6 +18,11 @@ async function testHttpEndpoints() {
   var pageHtml = await pageRes.text();
   console.log('✅ 1. GET / responded with status:', pageRes.status, '- Contains Qalidotae:', pageHtml.includes('Qalidotae'));
 
+  // 1b. Test GET /products (Full catalog page)
+  var prodPageRes = await fetch(BASE + '/products');
+  var prodPageHtml = await prodPageRes.text();
+  console.log('✅ 1b. GET /products responded with status:', prodPageRes.status, '- Contains Curated Atelier Collection:', prodPageHtml.includes('Curated Atelier Collection'));
+
   // 2. Test GET /api/geo-currency
   var geoRes = await fetch(BASE + '/api/geo-currency');
   var geoData = await geoRes.json();

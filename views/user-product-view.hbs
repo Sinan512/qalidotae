@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Qalidotae — Luxury Arabic Fashion & Atelier</title>
-  <meta name="description" content="Qalidotae luxury thobe and abaya atelier. Premium handcrafted Emirati, Moroccan, and Saudi garments, made with pure silk and spun cotton with worldwide Cash On Delivery." />
+  <title>{{title}}</title>
+  <meta name="description" content="Explore Qalidotae bespoke atelier collection. Master handcrafted thobes, abayas, kaftans, and luxury Arabic silhouettes with worldwide Cash On Delivery." />
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -12,10 +12,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@200;300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-  <link rel="stylesheet" href="stylesheets/user.css">
+  <link rel="stylesheet" href="/stylesheets/user.css">
 
 </head>
-<body>
+<body class="page-product-view">
 
   <!-- 1. TOP ANNOUNCEMENT BAR -->
   <aside class="announcement-bar" aria-label="Promotions">
@@ -28,7 +28,7 @@
     </div>
     <div class="announcement-content">
       <i data-lucide="sparkles" style="width: 14px; height: 14px; color: var(--gold-primary);"></i>
-      <span>Complimentary Worldwide Express Shipping </span>
+      <span>Complimentary Worldwide Express Shipping & Cash On Delivery</span>
     </div>
     <div class="announcement-controls">
       <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Switch Theme">
@@ -49,14 +49,15 @@
           <i data-lucide="menu"></i>
         </button>
         <ul class="nav-links">
-          <li><a href="#" class="nav-link active" onclick="filterByGender('all', event)">Atelier Collection</a></li>
-          <li><a href="#" class="nav-link" onclick="filterByGender('men', event)">Men</a></li>
-          <li><a href="#" class="nav-link" onclick="filterByGender('women', event)">Women</a></li>
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/products" class="nav-link active">Atelier Catalog</a></li>
+          <li><a href="/products?gender=men" class="nav-link" onclick="filterByGender('men', event)">Men</a></li>
+          <li><a href="/products?gender=women" class="nav-link" onclick="filterByGender('women', event)">Women</a></li>
           <li><a href="#" class="nav-link" onclick="openTrackOrderModal(event)">Track Order</a></li>
         </ul>
       </nav>
 
-      <!-- Center Logo (Dynamic: logo-white.png in dark, logo.png in light) -->
+      <!-- Center Logo -->
       <div class="brand-logo-wrap">
         <a href="/" aria-label="Qalidotae Homepage">
           <img src="/logo-white.png" alt="Qalidotae Atelier" class="brand-logo-img" id="headerLogoImg" />
@@ -96,21 +97,21 @@
       <div class="mobile-nav-content">
         <div class="mobile-nav-group">
           <div class="mobile-nav-label">ATELIER NAVIGATION</div>
-          <a href="/" class="mobile-nav-link active" onclick="filterByGender('all', event); toggleMobileNav();">
-            <i data-lucide="sparkles"></i>
-            <span>All Collections</span>
+          <a href="/" class="mobile-nav-link" onclick="toggleMobileNav();">
+            <i data-lucide="home"></i>
+            <span>Home Showcase</span>
           </a>
-          <a href="#" class="mobile-nav-link" onclick="filterByGender('men', event); toggleMobileNav();">
+          <a href="/products" class="mobile-nav-link active" onclick="toggleMobileNav();">
+            <i data-lucide="grid"></i>
+            <span>Full Garment Catalog</span>
+          </a>
+          <a href="/products?gender=men" class="mobile-nav-link" onclick="filterByGender('men', event); toggleMobileNav();">
             <i data-lucide="user"></i>
             <span>Men's Luxury Thobes</span>
           </a>
-          <a href="#" class="mobile-nav-link" onclick="filterByGender('women', event); toggleMobileNav();">
+          <a href="/products?gender=women" class="mobile-nav-link" onclick="filterByGender('women', event); toggleMobileNav();">
             <i data-lucide="heart"></i>
             <span>Women's Abayas & Kaftans</span>
-          </a>
-          <a href="/products" class="mobile-nav-link" onclick="toggleMobileNav();">
-            <i data-lucide="grid"></i>
-            <span>Full Garment Catalog</span>
           </a>
           <a href="#" class="mobile-nav-link" onclick="openTrackOrderModal(event); toggleMobileNav();">
             <i data-lucide="truck"></i>
@@ -133,140 +134,134 @@
     </aside>
   </div>
 
-  <!-- 3. HERO EDITORIAL SECTION -->
-  <section class="hero-section">
-    <div class="hero-container">
-      <span class="hero-subtitle"><i data-lucide="award" style="width: 14px; height: 14px;"></i> Artisanal Arabic Haute Couture</span>
-      <h1 class="hero-title">The Pinnacle of <em>Middle Eastern</em> Luxury</h1>
-      <p class="hero-description">
-        Handcrafted thobes, abayas, and couture silhouettes woven from the rarest Japanese spun silks and Normandy linens. Designed for presence and effortless grace.
-      </p>
-      <div class="hero-cta-group">
-        <button class="btn-gold" onclick="filterByGender('men')">
-          <span>Explore Men's Thobes</span>
-          <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-        </button>
-        <button class="btn-outline" onclick="filterByGender('women')">
-          <span>Explore Women's Haute Abayas</span>
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- 4. TRUST & LUXURY ASSURANCE BAR -->
-  <section class="trust-bar-section col-12 w-100">
-    <div class="trust-bar-wrapper col-12">
-      <div class="trust-bar" id="trustBarCarousel">
-        <div class="trust-card active col-12">
-          <div class="trust-icon"><i data-lucide="banknote"></i></div>
-          <div class="trust-text">
-            <div class="trust-title">Cash On Delivery</div>
-            <div class="trust-desc">Inspect & pay upon arrival at your doorstep</div>
-          </div>
+  <!-- 3. BREADCRUMBS & COLLECTION HEADER BANNER -->
+  <div class="catalog-page-banner">
+    <div class="catalog-page-banner-container">
+      <nav class="atelier-breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span class="crumb-separator">/</span>
+        <a href="/products">Atelier Collection</a>
+        <span class="crumb-separator">/</span>
+        <span class="crumb-current" id="breadcrumbActiveTag">All Bespoke Garments</span>
+      </nav>
+      
+      <div class="catalog-page-title-row">
+        <div>
+          <h1 class="catalog-page-title" id="catalogViewHeaderTitle">Curated Atelier Garment Catalog</h1>
+          <p class="catalog-page-subtitle" id="catalogViewHeaderSubtitle">Handcrafted Arabic silhouettes tailored from spun Japanese silk and Normandy linen.</p>
         </div>
-        <div class="trust-card col-12">
-          <div class="trust-icon"><i data-lucide="shield-check"></i></div>
-          <div class="trust-text">
-            <div class="trust-title">Master Tailored</div>
-            <div class="trust-desc">Pure hand-finished stitching & luxury drape</div>
-          </div>
-        </div>
-        <div class="trust-card col-12">
-          <div class="trust-icon"><i data-lucide="plane"></i></div>
-          <div class="trust-text">
-            <div class="trust-title">Express Delivery</div>
-            <div class="trust-desc">Dispatched in temperature-controlled casing</div>
-          </div>
-        </div>
-        <div class="trust-card col-12">
-          <div class="trust-icon"><i data-lucide="refresh-cw"></i></div>
-          <div class="trust-text">
-            <div class="trust-title">7-Day Bespoke Fit Exchange</div>
-            <div class="trust-desc">Guaranteed size perfection & client care</div>
-          </div>
+        <div class="catalog-results-badge" id="productCountSubtitle">
+          Displaying available garments
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- 4. TOP CUSTOM FILTER DROPDOWN MODEL / REFINEMENT BAR -->
+  <section class="filter-model-section" id="filterModelSection">
+    <div class="filter-model-container">
+      
+      <div class="filter-dropdown-bar">
+        
+        <!-- Filter Dropdown 1: Category / Type (Dynamic from DB) -->
+        <div class="filter-dropdown-item">
+          <label class="filter-dropdown-label">
+            <i data-lucide="layout-grid" style="width: 13px; height: 13px; color: var(--gold-primary);"></i>
+            <span>Garment Type</span>
+          </label>
+          <div class="filter-select-wrap">
+            <select class="filter-select" id="catalogTypeDropdown" onchange="handleDropdownTypeChange(this.value)">
+              <option value="all">All Garment Types</option>
+              <!-- Populated dynamically via renderDropdownFilters() -->
+            </select>
+            <i data-lucide="chevron-down" class="select-chevron"></i>
+          </div>
+        </div>
+
+        <!-- Filter Dropdown 2: Colour (Dynamic from DB) -->
+        <div class="filter-dropdown-item">
+          <label class="filter-dropdown-label">
+            <i data-lucide="palette" style="width: 13px; height: 13px; color: var(--gold-primary);"></i>
+            <span>Atelier Colour</span>
+          </label>
+          <div class="filter-select-wrap">
+            <select class="filter-select" id="catalogColorDropdown" onchange="handleDropdownColorChange(this.value)">
+              <option value="all">All Colours Palette</option>
+              <!-- Populated dynamically via renderDropdownFilters() -->
+            </select>
+            <i data-lucide="chevron-down" class="select-chevron"></i>
+          </div>
+        </div>
+
+        <!-- Filter Dropdown 3: Gender / Collection -->
+        <div class="filter-dropdown-item">
+          <label class="filter-dropdown-label">
+            <i data-lucide="users" style="width: 13px; height: 13px; color: var(--gold-primary);"></i>
+            <span>Collection</span>
+          </label>
+          <div class="filter-select-wrap">
+            <select class="filter-select" id="catalogGenderDropdown" onchange="handleDropdownGenderChange(this.value)">
+              <option value="all">All Collections</option>
+              <option value="men">Men's Thobes</option>
+              <option value="women">Women's Abayas & Kaftans</option>
+              <option value="unisex">Unisex Silhouettes</option>
+            </select>
+            <i data-lucide="chevron-down" class="select-chevron"></i>
+          </div>
+        </div>
+
+        <!-- Filter Dropdown 4: Sort -->
+        <div class="filter-dropdown-item">
+          <label class="filter-dropdown-label">
+            <i data-lucide="arrow-down-up" style="width: 13px; height: 13px; color: var(--gold-primary);"></i>
+            <span>Sort By</span>
+          </label>
+          <div class="filter-select-wrap">
+            <select class="filter-select" id="catalogSortDropdown" onchange="handleDropdownSortChange(this.value)">
+              <option value="newest">Newest Editions</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+            </select>
+            <i data-lucide="chevron-down" class="select-chevron"></i>
+          </div>
+        </div>
+
+        <!-- Search Input with Clear Button -->
+        <div class="filter-dropdown-item filter-search-item">
+          <label class="filter-dropdown-label">
+            <i data-lucide="search" style="width: 13px; height: 13px; color: var(--gold-primary);"></i>
+            <span>Search Garments</span>
+          </label>
+          <div class="filter-search-input-wrap">
+            <input type="text" class="form-input filter-search-input" id="catalogSearchInput" placeholder="Thobes, abayas, linen..." oninput="handleSearchInput()" />
+            <button type="button" class="search-clear-btn" id="searchClearBtn" onclick="clearSearchInput()" style="display: none;">
+              <i data-lucide="x" style="width: 13px; height: 13px;"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile & Tablet Filter Modal Button -->
+        <div class="filter-dropdown-item filter-modal-trigger-wrap">
+          <label class="filter-dropdown-label">&nbsp;</label>
+          <button class="btn-outline filter-modal-trigger-btn" onclick="openFilterModal()">
+            <i data-lucide="sliders-horizontal" style="width: 15px; height: 15px;"></i>
+            <span>Filter Refine</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Active Filter Tags Bar -->
+      <div class="active-tags-bar" id="activeFilterTagsBar">
+        <!-- Injected via updateActiveFilterTags() -->
+      </div>
+
+    </div>
   </section>
 
-  <!-- 5. MAIN PRODUCTS CATALOG SECTION -->
-  <main class="catalog-section" id="catalogSection">
+  <!-- 5. MAIN PRODUCTS CATALOG GRID -->
+  <main class="catalog-section" id="catalogSection" style="padding-top: 20px;">
     
-    <div class="catalog-header">
-      <div>
-        <h2 class="section-title">Curated Atelier Collection</h2>
-        <p class="section-subtitle" id="productCountSubtitle">Displaying available bespoke garments</p>
-      </div>
-    </div>
-
-    <!-- Controls: Gender tabs, Search, Sort, Type & Colour Dual Filters -->
-    <div class="catalog-controls">
-      <div class="controls-top-row">
-        <div class="gender-tabs">
-          <button class="gender-tab active" onclick="filterByGender('all', event)">All</button>
-          <button class="gender-tab" onclick="filterByGender('men', event)">Men</button>
-          <button class="gender-tab" onclick="filterByGender('women', event)">Women</button>
-          <button class="gender-tab" onclick="filterByGender('unisex', event)">Unisex</button>
-        </div>
-
-        <div class="search-sort-group">
-          <div class="search-input-wrap">
-            <input type="text" class="search-input" placeholder="Search thobes, abayas, fabrics..." id="catalogSearchInput" oninput="handleSearchInput()" />
-          </div>
-
-          <select class="sort-select" id="sortSelect" onchange="handleSortChange()">
-            <option value="newest">Sort: Newest Editions</option>
-            <option value="price_asc">Price: Low to High</option>
-            <option value="price_desc">Price: High to Low</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Part 1: Shop by Type / Categories (Premium Dynamic Auto-Moving Cards) -->
-      <div class="filter-part-block">
-        <div class="filter-part-header">
-          <div class="filter-part-title">
-            <i data-lucide="layout-grid" style="width: 14px; height: 14px; color: var(--gold-primary);"></i>
-            <span>Shop by Type / Categories</span>
-          </div>
-          <div class="filter-part-actions">
-            <span class="filter-part-active-badge" id="activeCategoryBadge">All Garments</span>
-            <a href="/products" class="filter-see-all-link">
-              <span>View All</span>
-              <i data-lucide="arrow-up-right" style="width: 12px; height: 12px;"></i>
-            </a>
-          </div>
-        </div>
-        <div class="premium-cards-scroll-wrap" id="categoryScrollWrap">
-          <div class="premium-cards-track" id="categoryCardsContainer">
-            <!-- Injected dynamically via renderDynamicCategoryCards() -->
-          </div>
-        </div>
-      </div>
-
-      <!-- Part 2: Shop by Colour (Premium Dynamic Auto-Moving Cards) -->
-      <div class="filter-part-block">
-        <div class="filter-part-header">
-          <div class="filter-part-title">
-            <i data-lucide="palette" style="width: 14px; height: 14px; color: var(--gold-primary);"></i>
-            <span>Shop by Colour</span>
-          </div>
-          <div class="filter-part-actions">
-            <span class="filter-part-active-badge" id="activeColorBadge">All Colours</span>
-            <a href="/products" class="filter-see-all-link">
-              <span>View All</span>
-              <i data-lucide="arrow-up-right" style="width: 12px; height: 12px;"></i>
-            </a>
-          </div>
-        </div>
-        <div class="premium-cards-scroll-wrap" id="colorScrollWrap">
-          <div class="premium-cards-track" id="colorCardsContainer">
-            <!-- Injected dynamically via renderDynamicColorCards() -->
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Products Grid (Filled Dynamically) -->
     <div class="products-grid" id="productsGridContainer">
       <!-- Loading Skeleton / Items will be injected here -->
@@ -276,23 +271,80 @@
       </div>
     </div>
 
-    <!-- Progressive Load Sentinel & Explore More Action Button -->
+    <!-- Progressive Load Sentinel & Infinite Scroll Loader -->
     <div id="catalogFooterAction" class="catalog-footer-action">
       <div id="catalogLoadingIndicator" class="catalog-scroll-loader" style="display: none;">
         <i data-lucide="loader-2" class="spin" style="width: 20px; height: 20px; color: var(--gold-primary);"></i>
         <span>Revealing more atelier creations...</span>
       </div>
-      <div id="exploreMoreContainer" class="explore-more-container" style="display: none;">
-        <a href="/products" class="btn-gold explore-more-btn" onclick="goToFullCatalog(event)">
-          <span>Explore More Creations</span>
-          <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-        </a>
-      </div>
+      <div id="exploreMoreContainer" class="explore-more-container" style="display: none;"></div>
     </div>
 
   </main>
 
-  <!-- 6. PRODUCT DETAIL MODAL -->
+  <!-- 6. FILTER REFINEMENT MODAL (For Mobile & Power Desktop) -->
+  <div class="modal-overlay" id="filterModalOverlay" onclick="closeFilterModal()">
+    <div class="modal-box filter-refine-modal" onclick="event.stopPropagation()">
+      <div class="modal-header-custom">
+        <h3 class="font-serif" style="font-size: 1.8rem; margin: 0; color: var(--text-main);">Filter & Refine Atelier</h3>
+        <button class="modal-close-btn" style="position: static;" onclick="closeFilterModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="filter-modal-body">
+        
+        <!-- Category Section -->
+        <div class="filter-modal-group">
+          <div class="filter-modal-label">Garment Type / Categories</div>
+          <div class="filter-modal-chips" id="modalCategoryChips">
+            <!-- Dynamic Category Chips -->
+          </div>
+        </div>
+
+        <!-- Colour Palette Section -->
+        <div class="filter-modal-group">
+          <div class="filter-modal-label">Colour Palette</div>
+          <div class="filter-modal-chips" id="modalColorChips">
+            <!-- Dynamic Colour Chips with swatches -->
+          </div>
+        </div>
+
+        <!-- Collection Section -->
+        <div class="filter-modal-group">
+          <div class="filter-modal-label">Collection Gender</div>
+          <div class="gender-tabs" style="width: 100%; justify-content: space-between;">
+            <button class="gender-tab active" onclick="filterByGender('all', event)">All</button>
+            <button class="gender-tab" onclick="filterByGender('men', event)">Men</button>
+            <button class="gender-tab" onclick="filterByGender('women', event)">Women</button>
+            <button class="gender-tab" onclick="filterByGender('unisex', event)">Unisex</button>
+          </div>
+        </div>
+
+        <!-- Sort Option -->
+        <div class="filter-modal-group">
+          <div class="filter-modal-label">Sort Order</div>
+          <select class="form-input" id="modalSortSelect" onchange="handleDropdownSortChange(this.value)">
+            <option value="newest">Newest Editions</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="filter-modal-footer">
+        <button class="btn-outline" style="flex: 1; justify-content: center;" onclick="resetFilters(); closeFilterModal();">
+          Reset All
+        </button>
+        <button class="btn-gold" style="flex: 1.5; justify-content: center;" onclick="closeFilterModal();">
+          Apply Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. PRODUCT DETAIL MODAL -->
   <div class="modal-overlay" id="productModalOverlay" onclick="closeProductModal()">
     <div class="modal-box" onclick="event.stopPropagation()">
       <button class="modal-close-btn" onclick="closeProductModal()" aria-label="Close modal">
@@ -304,7 +356,7 @@
     </div>
   </div>
 
-  <!-- 7. SIZE GUIDE MODAL -->
+  <!-- 8. SIZE GUIDE MODAL -->
   <div class="modal-overlay" id="sizeGuideModalOverlay" onclick="closeSizeGuideModal()">
     <div class="modal-box size-guide-modal" onclick="event.stopPropagation()">
       <button class="modal-close-btn" onclick="closeSizeGuideModal()">
@@ -331,7 +383,7 @@
     </div>
   </div>
 
-  <!-- 8. CART DRAWER OVERLAY & PANEL -->
+  <!-- 9. CART DRAWER OVERLAY & PANEL -->
   <div class="cart-drawer-overlay" id="cartDrawerOverlay" onclick="closeCartDrawer()">
     <aside class="cart-drawer" onclick="event.stopPropagation()" aria-label="Shopping cart">
       <div class="cart-header">
@@ -373,7 +425,7 @@
     </aside>
   </div>
 
-  <!-- 9. AUTHENTICATION MODAL (SIGN IN / REGISTER) -->
+  <!-- 10. AUTHENTICATION MODAL -->
   <div class="modal-overlay" id="authModalOverlay" onclick="closeAuthModal()">
     <div class="modal-box auth-modal-box" onclick="event.stopPropagation()">
       <button class="modal-close-btn" onclick="closeAuthModal()">
@@ -472,7 +524,7 @@
     </div>
   </div>
 
-  <!-- 10. CHECKOUT CONFIRMATION MODAL -->
+  <!-- 11. CHECKOUT CONFIRMATION MODAL -->
   <div class="modal-overlay" id="checkoutModalOverlay" onclick="closeCheckoutModal()">
     <div class="modal-box checkout-modal-box" onclick="event.stopPropagation()">
       <button class="modal-close-btn" onclick="closeCheckoutModal()">
@@ -527,7 +579,7 @@
     </div>
   </div>
 
-  <!-- 11. ORDER SUCCESS MODAL -->
+  <!-- 12. ORDER SUCCESS MODAL -->
   <div class="modal-overlay" id="orderSuccessModalOverlay">
     <div class="modal-box" style="max-width: 540px; text-align: center; padding: 40px 32px;" onclick="event.stopPropagation()">
       <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: #10b981; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
@@ -561,7 +613,7 @@
     </div>
   </div>
 
-  <!-- 12. TRACK ORDER MODAL & TIMELINE -->
+  <!-- 13. TRACK ORDER MODAL -->
   <div class="modal-overlay" id="trackingModalOverlay" onclick="closeTrackOrderModal()">
     <div class="modal-box tracking-modal-box" onclick="event.stopPropagation()">
       <button class="modal-close-btn" onclick="closeTrackOrderModal()">
@@ -586,7 +638,7 @@
     </div>
   </div>
 
-  <!-- 13. USER PROFILE & MY ORDERS MODAL -->
+  <!-- 14. USER PROFILE & MY ORDERS MODAL -->
   <div class="modal-overlay" id="profileModalOverlay" onclick="closeProfileModal()">
     <div class="modal-box" style="max-width: 680px; padding: 32px;" onclick="event.stopPropagation()">
       <button class="modal-close-btn" onclick="closeProfileModal()">
@@ -659,7 +711,7 @@
     </div>
   </div>
 
-  <!-- 14. CURRENCY SELECTOR MODAL -->
+  <!-- 15. CURRENCY SELECTOR MODAL -->
   <div class="modal-overlay" id="currencyModalOverlay" onclick="closeCurrencyModal()">
     <div class="modal-box" style="max-width: 440px; padding: 28px;" onclick="event.stopPropagation()">
       <button class="modal-close-btn" onclick="closeCurrencyModal()">
@@ -675,7 +727,7 @@
     </div>
   </div>
 
-  <!-- 15. SITE FOOTER -->
+  <!-- 16. SITE FOOTER -->
   <footer class="site-footer">
     <div class="footer-container">
       
@@ -696,11 +748,11 @@
       <div>
         <h4 class="footer-heading">Collections</h4>
         <ul class="footer-links">
-          <li><a href="#" class="footer-link" onclick="filterByGender('men', event)">Emirati Thobes</a></li>
-          <li><a href="#" class="footer-link" onclick="filterByGender('men', event)">Moroccan Hooded</a></li>
-          <li><a href="#" class="footer-link" onclick="filterByGender('men', event)">Saudi Classic Cut</a></li>
-          <li><a href="#" class="footer-link" onclick="filterByGender('women', event)">Noor Silk Abayas</a></li>
-          <li><a href="#" class="footer-link" onclick="filterByGender('women', event)">Sultana Jalabiyas</a></li>
+          <li><a href="/products?type=Emirati+Thobe" class="footer-link">Emirati Thobes</a></li>
+          <li><a href="/products?type=Moroccan+Hooded+Thobe" class="footer-link">Moroccan Hooded</a></li>
+          <li><a href="/products?type=Saudi+Thobe" class="footer-link">Saudi Classic Cut</a></li>
+          <li><a href="/products?type=Abaya" class="footer-link">Noor Silk Abayas</a></li>
+          <li><a href="/products?type=Jalabiya" class="footer-link">Sultana Jalabiyas</a></li>
         </ul>
       </div>
 
@@ -740,13 +792,13 @@
     </div>
   </footer>
 
-  <!-- 16. TOAST CONTAINER -->
+  <!-- 17. TOAST CONTAINER -->
   <div class="toast-container" id="toastContainer"></div>
 
- <!-- Option 1: Bootstrap Bundle with Popper -->
+  <!-- Bootstrap 5 Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 
   <!-- JAVASCRIPT CONNECTION -->
- <script src="javascripts/user.js"></script>
+  <script src="/javascripts/user.js"></script>
 </body>
 </html>
