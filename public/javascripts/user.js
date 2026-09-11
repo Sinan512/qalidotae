@@ -110,7 +110,7 @@
     }
 
     /* =========================================================================
-       TRUST & LUXURY ASSURANCE BAR 1.5s ROTATOR (1 CARD AT A TIME FULL COL-12)
+       TRUST & MODERN ASSURANCE BAR 1.5s ROTATOR (1 CARD AT A TIME FULL COL-12)
        ========================================================================= */
     let trustBarIntervalId = null;
 
@@ -202,7 +202,7 @@
     function toggleTheme() {
       const newTheme = state.theme === 'dark' ? 'light' : 'dark';
       applyTheme(newTheme);
-      showToast(`Switched to ${newTheme.toUpperCase()} atelier theme`, 'success');
+      showToast(`Switched to ${newTheme.toUpperCase()} theme`, 'success');
     }
 
     /* =========================================================================
@@ -230,7 +230,7 @@
       const mobCode = document.getElementById('mobileCurrencyText');
       const footCurr = document.getElementById('footerCurrencyDisplay');
 
-      if (topFlag) topFlag.innerText = state.currency.flag || '🇦🇪';
+      if (topFlag) topFlag.innerText = state.currency.flag || '🇮🇳';
       if (topCode) topCode.innerText = state.currency.code;
       if (mobCode) mobCode.innerText = state.currency.code;
       if (footCurr) footCurr.innerText = `${state.currency.code} (${state.currency.flag || '🇦🇪'})`;
@@ -533,9 +533,10 @@
 
         if (colWrap && !isHoveringColorWrap) {
           if (colWrap.scrollWidth > colWrap.clientWidth) {
-            colWrap.scrollLeft += scrollStep;
-            if (colWrap.scrollLeft >= colWrap.scrollWidth - colWrap.clientWidth - 1) {
-              colWrap.scrollLeft = 0;
+            colWrap.scrollLeft -= scrollStep;
+
+            if (colWrap.scrollLeft <= 0) {
+              colWrap.scrollLeft = colWrap.scrollWidth - colWrap.clientWidth;
             }
           }
         }
@@ -787,13 +788,13 @@
       const headerTitle = document.getElementById('catalogViewHeaderTitle');
 
       if (breadcrumbTag) {
-        breadcrumbTag.innerText = state.activeCategory !== 'all' ? state.activeCategory : 'All Bespoke Garments';
+        breadcrumbTag.innerText = state.activeCategory !== 'all' ? state.activeCategory : 'All Garments';
       }
 
       if (headerTitle && state.activeCategory !== 'all') {
-        headerTitle.innerText = `${state.activeCategory} Atelier Collection`;
+        headerTitle.innerText = `${state.activeCategory} Qalidotae Collection`;
       } else if (headerTitle) {
-        headerTitle.innerText = 'Curated Atelier Garment Catalog';
+        headerTitle.innerText = 'Qalidotae Garment Catalog';
       }
     }
 
@@ -920,8 +921,8 @@
       }
 
       container.innerHTML = itemsToDisplay.map(product => {
-        const frontImg = product.frontImage || '/logo-white.png';
-        const backImg = product.backImage || product.frontImage || '/logo-white.png';
+        const frontImg = product.frontImage || '/logo.png';
+        const backImg = product.backImage || product.frontImage || '/logo.png';
         const formattedPrice = formatPrice(product.price);
         const isLowStock = product.totalStock > 0 && product.totalStock <= 5;
         const isOutOfStock = product.totalStock === 0;
@@ -1256,7 +1257,7 @@
 
           <!-- Stock & Description -->
           <div class="detail-desc">
-            ${product.description || 'Masterfully constructed with hand-knotted stitching, bespoke neck piping, and comfortable breathable drape tailored for royal occasions.'}
+            ${product.description || 'Structured shoulders, clean seams, and custom hardware designed to retain form after repeated wear.'}
           </div>
 
           <!-- Quantity Stepper -->
@@ -1280,7 +1281,7 @@
             </button>
             <div class="cod-guarantee-note">
               <i data-lucide="shield-check" style="width: 14px; height: 14px; color: var(--gold-primary);"></i>
-              <span>Cash On Delivery • Complimentary Worldwide Express • 7-Day Fit Guarantee</span>
+              <span>Cash On Delivery • Worldwide Express • 7-Day Fit Guarantee</span>
             </div>
           </div>
 
@@ -1447,7 +1448,7 @@
           <div class="cart-empty-state">
             <i data-lucide="shopping-bag" style="width: 48px; height: 48px;"></i>
             <div style="font-weight: 600; color: var(--text-main); font-size: 1.1rem;">Your shopping bag is empty</div>
-            <p style="font-size: 0.82rem;">Discover our handmade collection and add bespoke thobes or abayas.</p>
+            <p style="font-size: 0.82rem;">Discover our handmade collection and choose your favorite thobes or abayas.</p>
             <button class="btn-gold" style="margin-top: 12px;" onclick="closeCartDrawer()">Explore Atelier</button>
           </div>
         `;
@@ -1897,7 +1898,7 @@
           state.user = data.user;
           updateUserUI();
           closeAuthModal();
-          showToast(`Welcome to Qalidotae Atelier, ${data.user.fullName}!`, 'success');
+          showToast(`Welcome to Qalidotae, ${data.user.fullName}!`, 'success');
 
           // Immediately advance to checkout
           if (state.cart.length > 0) {
@@ -2014,11 +2015,9 @@
                     <button class="btn-outline" style="padding: 4px 10px; font-size: 0.72rem;" onclick="closeProfileModal(); openTrackOrderModal(null, '${o.orderNumber}')">
                       Track
                     </button>
-                    ${o.status === 'order pending' ? `
-                      <button class="btn-outline" style="padding: 4px 10px; font-size: 0.72rem; color: #ef4444; border-color: rgba(239,68,68,0.3);" onclick="cancelUserOrder('${o._id}')">
-                        Cancel
-                      </button>
-                    ` : ''}
+                    <button class="btn-outline" style="padding: 4px 10px; font-size: 0.72rem; color: #ef4444; border-color: rgba(239,68,68,0.3);" onclick="cancelUserOrder('${o._id,o.status}')">
+                      Cancel
+                    </button>
                   </div>
                 </div>
               </div>
@@ -2031,8 +2030,8 @@
       }
     }
 
-    async function cancelUserOrder(orderId) {
-      if (!confirm('Are you sure you wish to cancel this pending order?')) return;
+    async function cancelUserOrder(orderId,status) {
+      if (!confirm('Are you sure you wish to cancel this '+ status + ' order?')) return;
       try {
         const res = await fetch(`/api/orders/${orderId}/cancel`, { method: 'POST' });
         const data = await res.json();
@@ -2129,6 +2128,6 @@
 
     function handleNewsletterSubmit(e) {
       e.preventDefault();
-      showToast('Thank you for subscribing to the Qalidotae Private Gazette.', 'success');
+      showToast('Thank you for subscribing to the Qalidotae.', 'success');
       e.target.reset();
     }

@@ -1137,10 +1137,10 @@
       to { opacity: 1; transform: translateX(0); }
     }
 
-    .toast.success { border-left: 4px solid var(--success); }
-    .toast.error { border-left: 4px solid var(--danger); }
-    .toast.warning { border-left: 4px solid var(--warning); }
-    .toast.info { border-left: 4px solid var(--gold-primary); }
+    .toast.success { border: 1px solid var(--success); }
+    .toast.error { border: 1px solid var(--danger); }
+    .toast.warning { border: 1px solid var(--warning); }
+    .toast.info { border: 1px solid var(--gold-primary); }
 
     /* Empty state */
     .empty-state {

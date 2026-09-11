@@ -3,14 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Qalidotae — Luxury Arabic Fashion & Atelier</title>
-  <meta name="description" content="Qalidotae luxury thobe and abaya atelier. Premium handcrafted Emirati, Moroccan, and Saudi garments, made with pure silk and spun cotton with worldwide Cash On Delivery." />
+  <title>{{title}}</title>
+  <meta name="description" content={{description}} />
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@200;300;400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{siteName}}">
+  <meta property="og:description" content={{description}}>
+  <meta property="og:url" content={{siteUrl}}>
+  <meta property="og:image" content={{logo}}>
+
+  <meta name="google-site-verification" content="googleea93e70ef72d50ac.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content={{siteName}}>
+  <meta name="twitter:description" content={{title}}>
+  <meta name="twitter:image" content={{logo}}>
+  <meta name="robots" content="index,follow">
+
+  <link rel="canonical" href={{canonical}}>
+  <link rel="icon" href="/logo-white.png" />
+  <link rel="apple-touch-icon" href="/logo-white.png" />
+   <link rel="preload" as="image" href={{logo}} />
+
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="javascripts/user.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
   <link rel="stylesheet" href="stylesheets/user.css">
 
@@ -21,14 +41,13 @@
   <aside class="announcement-bar" aria-label="Promotions">
     <div class="announcement-controls">
       <div class="currency-selector-top" onclick="openCurrencyModal()" title="Select Currency">
-        <span id="topCurrencyFlag">IN</span>
-        <span id="topCurrencyCode" style="font-weight: 700;">IND</span>
+        <span id="topCurrencyFlag">🇮🇳</span>
+        <span id="topCurrencyCode" style="font-weight: 700;">INR</span>
         <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
       </div>
     </div>
     <div class="announcement-content">
-      <i data-lucide="sparkles" style="width: 14px; height: 14px; color: var(--gold-primary);"></i>
-      <span>Complimentary Worldwide Express Shipping </span>
+      <span>Worldwide Express Shipping </span>
     </div>
     <div class="announcement-controls">
       <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Switch Theme">
@@ -49,17 +68,16 @@
           <i data-lucide="menu"></i>
         </button>
         <ul class="nav-links">
-          <li><a href="#" class="nav-link active" onclick="filterByGender('all', event)">Atelier Collection</a></li>
-          <li><a href="#" class="nav-link" onclick="filterByGender('men', event)">Men</a></li>
+          <li><a href="#" class="nav-link active" onclick="filterByGender('all', event)">View Collection</a></li>
+          <li><a href="" class="nav-link" onclick="filterByGender('men', event)">Men</a></li>
           <li><a href="#" class="nav-link" onclick="filterByGender('women', event)">Women</a></li>
-          <li><a href="#" class="nav-link" onclick="openTrackOrderModal(event)">Track Order</a></li>
         </ul>
       </nav>
 
       <!-- Center Logo (Dynamic: logo-white.png in dark, logo.png in light) -->
       <div class="brand-logo-wrap">
         <a href="/" aria-label="Qalidotae Homepage">
-          <img src="/logo-white.png" alt="Qalidotae Atelier" class="brand-logo-img" id="headerLogoImg" />
+          <img src="/logo-white.png" alt="Qalidotae Dresses" class="brand-logo-img" id="headerLogoImg" />
         </a>
       </div>
 
@@ -95,18 +113,18 @@
       </div>
       <div class="mobile-nav-content">
         <div class="mobile-nav-group">
-          <div class="mobile-nav-label">ATELIER NAVIGATION</div>
+          <div class="mobile-nav-label">DOTAE NAVIGATION</div>
           <a href="/" class="mobile-nav-link active" onclick="filterByGender('all', event); toggleMobileNav();">
             <i data-lucide="sparkles"></i>
             <span>All Collections</span>
           </a>
           <a href="#" class="mobile-nav-link" onclick="filterByGender('men', event); toggleMobileNav();">
             <i data-lucide="user"></i>
-            <span>Men's Luxury Thobes</span>
+            <span>Men's Collection</span>
           </a>
           <a href="#" class="mobile-nav-link" onclick="filterByGender('women', event); toggleMobileNav();">
             <i data-lucide="heart"></i>
-            <span>Women's Abayas & Kaftans</span>
+            <span>Women's Collection</span>
           </a>
           <a href="/products" class="mobile-nav-link" onclick="toggleMobileNav();">
             <i data-lucide="grid"></i>
@@ -136,10 +154,10 @@
   <!-- 3. HERO EDITORIAL SECTION -->
   <section class="hero-section">
     <div class="hero-container">
-      <span class="hero-subtitle"><i data-lucide="award" style="width: 14px; height: 14px;"></i> Artisanal Arabic Haute Couture</span>
+      <span class="hero-subtitle"><i data-lucide="award" style="width: 14px; height: 14px;"></i> Heritage Reframed for the Modern Era</span>
       <h1 class="hero-title">The Pinnacle of <em>Middle Eastern</em> Luxury</h1>
       <p class="hero-description">
-        Handcrafted thobes, abayas, and couture silhouettes woven from the rarest Japanese spun silks and Normandy linens. Designed for presence and effortless grace.
+        Bridges the gap between classic Arabic drapery, intricate embroidery, and modern minimalist silhouettes. Designed for those who express identity through bold, refined wardrobe choices.
       </p>
       <div class="hero-cta-group">
         <button class="btn-gold" onclick="filterByGender('men')">
@@ -147,7 +165,7 @@
           <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
         </button>
         <button class="btn-outline" onclick="filterByGender('women')">
-          <span>Explore Women's Haute Abayas</span>
+          <span>Explore Women's Abayas</span>
         </button>
       </div>
     </div>
@@ -168,7 +186,7 @@
           <div class="trust-icon"><i data-lucide="shield-check"></i></div>
           <div class="trust-text">
             <div class="trust-title">Master Tailored</div>
-            <div class="trust-desc">Pure hand-finished stitching & luxury drape</div>
+            <div class="trust-desc">Pure hand-finished stitching </div>
           </div>
         </div>
         <div class="trust-card col-12">
@@ -182,7 +200,7 @@
           <div class="trust-icon"><i data-lucide="refresh-cw"></i></div>
           <div class="trust-text">
             <div class="trust-title">7-Day Bespoke Fit Exchange</div>
-            <div class="trust-desc">Guaranteed size perfection & client care</div>
+            <div class="trust-desc">Guaranteed size perfection & Cloth Quality</div>
           </div>
         </div>
       </div>
@@ -194,8 +212,8 @@
     
     <div class="catalog-header">
       <div>
-        <h2 class="section-title">Curated Atelier Collection</h2>
-        <p class="section-subtitle" id="productCountSubtitle">Displaying available bespoke garments</p>
+        <h2 class="section-title">Explore Seasonal Collection</h2>
+        <p class="section-subtitle" id="productCountSubtitle">Displaying available authentic garments</p>
       </div>
     </div>
 
@@ -227,7 +245,7 @@
         <div class="filter-part-header">
           <div class="filter-part-title">
             <i data-lucide="layout-grid" style="width: 14px; height: 14px; color: var(--gold-primary);"></i>
-            <span>Shop by Type / Categories</span>
+            <span>Explore by Categories</span>
           </div>
           <div class="filter-part-actions">
             <span class="filter-part-active-badge" id="activeCategoryBadge">All Garments</span>
@@ -249,7 +267,7 @@
         <div class="filter-part-header">
           <div class="filter-part-title">
             <i data-lucide="palette" style="width: 14px; height: 14px; color: var(--gold-primary);"></i>
-            <span>Shop by Colour</span>
+            <span>Pick Your Colour</span>
           </div>
           <div class="filter-part-actions">
             <span class="filter-part-active-badge" id="activeColorBadge">All Colours</span>
@@ -272,7 +290,7 @@
       <!-- Loading Skeleton / Items will be injected here -->
       <div style="grid-column: 1 / -1; text-align: center; padding: 60px 0; color: var(--text-dim);">
         <i data-lucide="loader-2" class="spin" style="width: 32px; height: 32px; margin: 0 auto 12px;"></i>
-        <div>Fetching master atelier creations...</div>
+        <div>Collecting our master creations for you...</div>
       </div>
     </div>
 
@@ -280,7 +298,7 @@
     <div id="catalogFooterAction" class="catalog-footer-action">
       <div id="catalogLoadingIndicator" class="catalog-scroll-loader" style="display: none;">
         <i data-lucide="loader-2" class="spin" style="width: 20px; height: 20px; color: var(--gold-primary);"></i>
-        <span>Revealing more atelier creations...</span>
+        <span>Introducing more creations...</span>
       </div>
       <div id="exploreMoreContainer" class="explore-more-container" style="display: none;">
         <a href="/products" class="btn-gold explore-more-btn" onclick="goToFullCatalog(event)">
@@ -311,14 +329,14 @@
         <i data-lucide="x"></i>
       </button>
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-        <h3 class="font-serif" style="font-size: 1.8rem; color: var(--text-main);">Atelier Sizing Guide</h3>
+        <h3 class="font-serif" style="font-size: 1.8rem; color: var(--text-main);">Qalidotae Sizing Guide</h3>
         <div style="display: flex; gap: 4px; background: var(--bg-input); padding: 3px; border-radius: var(--radius-sm);">
           <button id="unitBtnCm" class="filter-chip active" style="padding: 4px 10px; font-size: 0.72rem;" onclick="toggleSizingUnit('cm')">CM</button>
           <button id="unitBtnIn" class="filter-chip" style="padding: 4px 10px; font-size: 0.72rem;" onclick="toggleSizingUnit('in')">Inches</button>
         </div>
       </div>
       <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
-        Our garments are custom-tailored with traditional Arabic drape. For tailored thobes, standard length is matched to height from shoulder to ankle.
+        Not sure about your fit? Check our Size Guide to find your perfect match.
       </p>
       
       <table class="size-guide-table" id="sizeGuideTable">
@@ -326,7 +344,7 @@
       </table>
 
       <div style="background: var(--bg-surface-elevated); padding: 14px; border-radius: var(--radius-sm); font-size: 0.78rem; color: var(--text-dim); border: 1px solid var(--border-color);">
-        <strong style="color: var(--gold-primary);">Bespoke Advice:</strong> If you prefer a loose traditional drape with tarboosh tassel, we recommend choosing one size up.
+        <strong style="color: var(--gold-primary);">Sizing Advice:</strong> If you're between sizes, we recommend sizing up for a relaxed fit or sizing down for a tailored look.
       </div>
     </div>
   </div>
@@ -351,11 +369,11 @@
       <div class="cart-summary" id="cartSummarySection">
         <div class="summary-row">
           <span>Subtotal</span>
-          <span id="cartSubtotalText">AED 0</span>
+          <span id="cartSubtotalText">INR 0</span>
         </div>
         <div class="summary-row">
           <span>Express Courier Shipping</span>
-          <span style="color: #10b981; font-weight: 600;">Complimentary (Free)</span>
+          <span style="color: #10b981; font-weight: 600;">Within 7 Days</span>
         </div>
         <div class="summary-row">
           <span>Payment Method</span>
@@ -363,7 +381,7 @@
         </div>
         <div class="summary-row total">
           <span>Estimated Total</span>
-          <span id="cartTotalText" style="color: var(--gold-primary);">AED 0</span>
+          <span id="cartTotalText" style="color: var(--gold-primary);">INR 0</span>
         </div>
         <button class="btn-gold" style="width: 100%; justify-content: center; margin-top: 8px;" onclick="startCheckoutFlow()">
           <span>Proceed to Checkout</span>
@@ -479,7 +497,7 @@
         <i data-lucide="x"></i>
       </button>
 
-      <h3 class="font-serif" style="font-size: 2rem; color: var(--text-main); margin-bottom: 6px;">Finalize Atelier Order</h3>
+      <h3 class="font-serif" style="font-size: 2rem; color: var(--text-main); margin-bottom: 6px;">Make Your Order</h3>
       <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px;">
         Review your delivery address and confirm order placement with Cash On Delivery.
       </p>
@@ -488,7 +506,7 @@
       <div style="background: var(--bg-surface-elevated); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 16px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <strong style="font-size: 0.88rem; color: var(--gold-primary); text-transform: uppercase;">Shipping Address</strong>
-          <span style="font-size: 0.75rem; color: var(--text-dim);" id="checkoutClientName">Client</span>
+          <span style="font-size: 0.75rem; color: var(--text-dim);" id="checkoutClientName">User</span>
         </div>
         <div id="checkoutAddressText" style="font-size: 0.85rem; color: var(--text-main); line-height: 1.5;">
           Loading destination...
@@ -536,7 +554,7 @@
 
       <h3 class="font-serif" style="font-size: 2.2rem; color: var(--text-main); margin-bottom: 6px;">Order Confirmed</h3>
       <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">
-        Thank you for choosing Qalidotae. Your bespoke garments have been scheduled for master tailoring and dispatch.
+        Thank you for choosing Qalidotae. Your optimal match have been scheduled for dispatch.
       </p>
 
       <div style="background: var(--bg-surface-elevated); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-bottom: 24px; text-align: left;">
@@ -595,8 +613,8 @@
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div>
-          <h3 class="font-serif" style="font-size: 2rem; color: var(--text-main);" id="profileHeaderName">Client Profile</h3>
-          <p style="font-size: 0.8rem; color: var(--gold-primary);" id="profileHeaderEmail">client@example.com</p>
+          <h3 class="font-serif" style="font-size: 2rem; color: var(--text-main);" id="profileHeaderName">User Profile</h3>
+          <p style="font-size: 0.8rem; color: var(--gold-primary);" id="profileHeaderEmail">yourEmail@example.com</p>
         </div>
         <button class="btn-outline" style="padding: 6px 14px; font-size: 0.78rem;" onclick="handleLogout()">
           <i data-lucide="log-out"></i> Sign Out
@@ -683,7 +701,7 @@
       <div>
         <img src="/logo-white.png" alt="Qalidotae Logo" class="footer-logo" id="footerLogoImg" />
         <p class="footer-desc">
-          Qalidotae Atelier is an artisanal Arabic fashion maison dedicated to heritage cuts, impeccable drapes, and distinguished royal presence.
+          Qalidotae was created to honor Arabic sartorial history while adapting it to the rhythms of modern global fashion.
         </p>
         <div style="display: flex; gap: 10px; margin-top: 20px;">
           <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--gold-light); background: rgba(212,175,55,0.1); padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid rgba(212,175,55,0.25);">
@@ -704,22 +722,22 @@
         </ul>
       </div>
 
-      <!-- Col 3: Atelier Care -->
+      <!-- Col 3: Users footer -->
       <div>
-        <h4 class="footer-heading">Client Care</h4>
+        <h4 class="footer-heading">Actions</h4>
         <ul class="footer-links">
           <li><a href="#" class="footer-link" onclick="openTrackOrderModal(event)">Track My Order</a></li>
           <li><a href="#" class="footer-link" onclick="openSizeGuideModal()">Sizing & Fit Guide</a></li>
           <li><a href="#" class="footer-link" onclick="showToast('Cash On Delivery is available worldwide.', 'success')">Cash On Delivery Info</a></li>
-          <li><a href="#" class="footer-link" onclick="handleAccountClick()">Client Portal</a></li>
+          <li><a href="#" class="footer-link" onclick="handleAccountClick()">User Portal</a></li>
         </ul>
       </div>
 
       <!-- Col 4: Newsletter -->
       <div>
-        <h4 class="footer-heading">Private Atelier Gazette</h4>
+        <h4 class="footer-heading">Connect With Qalidotae</h4>
         <p style="font-size: 0.8rem; color: #a1a1aa; margin-bottom: 12px;">
-          Receive bespoke seasonal lookbooks and private fabric invitations.
+          Receive newest seasonal lookbooks and fashion updates.
         </p>
         <form onsubmit="handleNewsletterSubmit(event)" style="display: flex; gap: 6px;">
           <input type="email" class="form-input" placeholder="Your email address" required style="background: #18181f; border-color: rgba(255,255,255,0.15); font-size: 0.8rem;" />
@@ -732,10 +750,10 @@
     </div>
 
     <div class="footer-bottom">
-      <div>&copy; 2026 QALIDOTAE LUXURY ATELIER LLC. All Rights Reserved.</div>
+      <div>&copy; QALIDOTAE MODERN ARABIC FASHION CLOTHES. All Rights Reserved.</div>
       <div style="display: flex; gap: 20px;">
         <span style="cursor: pointer;" onclick="openCurrencyModal()">Currency: <strong id="footerCurrencyDisplay">AED (🇦🇪)</strong></span>
-        <span>Made with royal perfection</span>
+        <span>Made by _mhd_cnan</span>
       </div>
     </div>
   </footer>
@@ -746,7 +764,5 @@
  <!-- Option 1: Bootstrap Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 
-  <!-- JAVASCRIPT CONNECTION -->
- <script src="javascripts/user.js"></script>
 </body>
 </html>

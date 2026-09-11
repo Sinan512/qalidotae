@@ -1,0 +1,11 @@
+User-agent:*
+Allow: /
+
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+Disallow: /user/
+Disallow: /login
+Disallow: /signup
+
+Sitemap: htpps://https://qalidotae-modern-arabic-fashion.vercel.app/sitemap.xml

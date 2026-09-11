@@ -52,7 +52,7 @@ async function connectDB() {
   var uri = process.env.MONGODB_URI;
   try {
     if (mongoose.connection.readyState === 0) {
-      console.log('📦 Connected to MongoDB at:', uri);
+      console.log('Connected to MongoDB at:', uri);
       await mongoose.connect(uri);
       await seedAdminIfEmpty();
       await seedPaymentSetupIfEmpty();

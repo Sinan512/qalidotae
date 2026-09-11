@@ -1,7 +1,8 @@
 var crypto = require('crypto');
 var Admin = require('../models/Admin');
+var {connectDB} = require('../models');
 
-var SECRET = process.env.ADMIN_SESSION_SECRET || 'qalidotae_luxury_atelier_admin_secret_key_2026';
+var SECRET = process.env.ADMIN_SESSION_SECRET || 'qalidotae_admin_secret_key';
 var THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 function createSessionToken(payload) {
@@ -45,6 +46,7 @@ async function getAuthenticatedAdmin(req) {
   if (!payload || !payload.adminId) return null;
 
   try {
+    await connectDB();
     var admin = await Admin.findById(payload.adminId).select('-password');
     return admin;
   } catch (err) {

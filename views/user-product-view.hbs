@@ -4,12 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>{{title}}</title>
-  <meta name="description" content="Explore Qalidotae bespoke atelier collection. Master handcrafted thobes, abayas, kaftans, and luxury Arabic silhouettes with worldwide Cash On Delivery." />
+  <meta name="description" content={{description}} />
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@200;300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{siteName}}">
+  <meta property="og:description" content={{description}}>
+  <meta property="og:url" content={{siteUrl}}>
+  <meta property="og:image" content={{logo}}>
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content={{siteName}}>
+  <meta name="twitter:description" content={{title}}>
+  <meta name="twitter:image" content={{logo}}>
+  <meta name="robots" content="index,follow">
+
+  <link rel="canonical" href={{canonical}}>
+  <link rel="icon" href="/logo-white.png" />
+  <link rel="apple-touch-icon" href="/logo-white.png" />
+  <link rel="preload" as="image" href={{logo}} />
+
   <script src="https://unpkg.com/lucide@latest"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
   <link rel="stylesheet" href="/stylesheets/user.css">
@@ -50,7 +68,7 @@
         </button>
         <ul class="nav-links">
           <li><a href="/" class="nav-link">Home</a></li>
-          <li><a href="/products" class="nav-link active">Atelier Catalog</a></li>
+          <li><a href="/products" class="nav-link active">Product Catalog</a></li>
           <li><a href="/products?gender=men" class="nav-link" onclick="filterByGender('men', event)">Men</a></li>
           <li><a href="/products?gender=women" class="nav-link" onclick="filterByGender('women', event)">Women</a></li>
           <li><a href="#" class="nav-link" onclick="openTrackOrderModal(event)">Track Order</a></li>
@@ -60,7 +78,7 @@
       <!-- Center Logo -->
       <div class="brand-logo-wrap">
         <a href="/" aria-label="Qalidotae Homepage">
-          <img src="/logo-white.png" alt="Qalidotae Atelier" class="brand-logo-img" id="headerLogoImg" />
+          <img src="/logo-white.png" alt="Qalidotae" class="brand-logo-img" id="headerLogoImg" />
         </a>
       </div>
 
@@ -96,7 +114,7 @@
       </div>
       <div class="mobile-nav-content">
         <div class="mobile-nav-group">
-          <div class="mobile-nav-label">ATELIER NAVIGATION</div>
+          <div class="mobile-nav-label">PRODUCTS NAVIGATION</div>
           <a href="/" class="mobile-nav-link" onclick="toggleMobileNav();">
             <i data-lucide="home"></i>
             <span>Home Showcase</span>
@@ -107,7 +125,7 @@
           </a>
           <a href="/products?gender=men" class="mobile-nav-link" onclick="filterByGender('men', event); toggleMobileNav();">
             <i data-lucide="user"></i>
-            <span>Men's Luxury Thobes</span>
+            <span>Men's Modern Thobes</span>
           </a>
           <a href="/products?gender=women" class="mobile-nav-link" onclick="filterByGender('women', event); toggleMobileNav();">
             <i data-lucide="heart"></i>
@@ -123,7 +141,7 @@
           <div class="mobile-nav-label">PREFERENCES</div>
           <button class="btn-outline mobile-pref-btn" onclick="openCurrencyModal()">
             <i data-lucide="globe"></i>
-            <span>Currency: <strong id="mobileCurrencyText">AED</strong></span>
+            <span>Currency: <strong id="mobileCurrencyText">IN</strong></span>
           </button>
           <button class="btn-outline mobile-pref-btn" onclick="toggleTheme()">
             <i data-lucide="moon"></i>
@@ -140,15 +158,15 @@
       <nav class="atelier-breadcrumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span class="crumb-separator">/</span>
-        <a href="/products">Atelier Collection</a>
+        <a href="/products">Collection</a>
         <span class="crumb-separator">/</span>
-        <span class="crumb-current" id="breadcrumbActiveTag">All Bespoke Garments</span>
+        <span class="crumb-current" id="breadcrumbActiveTag">All Garments</span>
       </nav>
       
       <div class="catalog-page-title-row">
         <div>
-          <h1 class="catalog-page-title" id="catalogViewHeaderTitle">Curated Atelier Garment Catalog</h1>
-          <p class="catalog-page-subtitle" id="catalogViewHeaderSubtitle">Handcrafted Arabic silhouettes tailored from spun Japanese silk and Normandy linen.</p>
+          <h1 class="catalog-page-title" id="catalogViewHeaderTitle">Curated Garment Catalog</h1>
+          <p class="catalog-page-subtitle" id="catalogViewHeaderSubtitle">Timeless design meets modern utility. Handpicked pieces for everyday elevation.</p>
         </div>
         <div class="catalog-results-badge" id="productCountSubtitle">
           Displaying available garments
@@ -182,7 +200,7 @@
         <div class="filter-dropdown-item">
           <label class="filter-dropdown-label">
             <i data-lucide="palette" style="width: 13px; height: 13px; color: var(--gold-primary);"></i>
-            <span>Atelier Colour</span>
+            <span>Colour</span>
           </label>
           <div class="filter-select-wrap">
             <select class="filter-select" id="catalogColorDropdown" onchange="handleDropdownColorChange(this.value)">
@@ -286,7 +304,7 @@
   <div class="modal-overlay" id="filterModalOverlay" onclick="closeFilterModal()">
     <div class="modal-box filter-refine-modal" onclick="event.stopPropagation()">
       <div class="modal-header-custom">
-        <h3 class="font-serif" style="font-size: 1.8rem; margin: 0; color: var(--text-main);">Filter & Refine Atelier</h3>
+        <h3 class="font-serif" style="font-size: 1.8rem; margin: 0; color: var(--text-main);">Filter & Refine</h3>
         <button class="modal-close-btn" style="position: static;" onclick="closeFilterModal()">
           <i data-lucide="x"></i>
         </button>
@@ -363,7 +381,7 @@
         <i data-lucide="x"></i>
       </button>
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-        <h3 class="font-serif" style="font-size: 1.8rem; color: var(--text-main);">Atelier Sizing Guide</h3>
+        <h3 class="font-serif" style="font-size: 1.8rem; color: var(--text-main);">Sizing Guide</h3>
         <div style="display: flex; gap: 4px; background: var(--bg-input); padding: 3px; border-radius: var(--radius-sm);">
           <button id="unitBtnCm" class="filter-chip active" style="padding: 4px 10px; font-size: 0.72rem;" onclick="toggleSizingUnit('cm')">CM</button>
           <button id="unitBtnIn" class="filter-chip" style="padding: 4px 10px; font-size: 0.72rem;" onclick="toggleSizingUnit('in')">Inches</button>
@@ -531,7 +549,7 @@
         <i data-lucide="x"></i>
       </button>
 
-      <h3 class="font-serif" style="font-size: 2rem; color: var(--text-main); margin-bottom: 6px;">Finalize Atelier Order</h3>
+      <h3 class="font-serif" style="font-size: 2rem; color: var(--text-main); margin-bottom: 6px;">Finalize Your Order</h3>
       <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px;">
         Review your delivery address and confirm order placement with Cash On Delivery.
       </p>
@@ -540,7 +558,7 @@
       <div style="background: var(--bg-surface-elevated); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 16px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <strong style="font-size: 0.88rem; color: var(--gold-primary); text-transform: uppercase;">Shipping Address</strong>
-          <span style="font-size: 0.75rem; color: var(--text-dim);" id="checkoutClientName">Client</span>
+          <span style="font-size: 0.75rem; color: var(--text-dim);" id="checkoutClientName">User</span>
         </div>
         <div id="checkoutAddressText" style="font-size: 0.85rem; color: var(--text-main); line-height: 1.5;">
           Loading destination...
@@ -588,7 +606,7 @@
 
       <h3 class="font-serif" style="font-size: 2.2rem; color: var(--text-main); margin-bottom: 6px;">Order Confirmed</h3>
       <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">
-        Thank you for choosing Qalidotae. Your bespoke garments have been scheduled for master tailoring and dispatch.
+        Thank you for choosing Qalidotae. Your optimal match have been scheduled for dispatch.
       </p>
 
       <div style="background: var(--bg-surface-elevated); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-bottom: 24px; text-align: left;">
@@ -647,8 +665,8 @@
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div>
-          <h3 class="font-serif" style="font-size: 2rem; color: var(--text-main);" id="profileHeaderName">Client Profile</h3>
-          <p style="font-size: 0.8rem; color: var(--gold-primary);" id="profileHeaderEmail">client@example.com</p>
+          <h3 class="font-serif" style="font-size: 2rem; color: var(--text-main);" id="profileHeaderName">User Profile</h3>
+          <p style="font-size: 0.8rem; color: var(--gold-primary);" id="profileHeaderEmail">user@example.com</p>
         </div>
         <button class="btn-outline" style="padding: 6px 14px; font-size: 0.78rem;" onclick="handleLogout()">
           <i data-lucide="log-out"></i> Sign Out
@@ -735,7 +753,7 @@
       <div>
         <img src="/logo-white.png" alt="Qalidotae Logo" class="footer-logo" id="footerLogoImg" />
         <p class="footer-desc">
-          Qalidotae Atelier is an artisanal Arabic fashion maison dedicated to heritage cuts, impeccable drapes, and distinguished royal presence.
+           Qalidotae was created to honor Arabic sartorial history while adapting it to the rhythms of modern global fashion.
         </p>
         <div style="display: flex; gap: 10px; margin-top: 20px;">
           <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--gold-light); background: rgba(212,175,55,0.1); padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid rgba(212,175,55,0.25);">
@@ -756,22 +774,22 @@
         </ul>
       </div>
 
-      <!-- Col 3: Atelier Care -->
+      <!-- Col 3: User Footer -->
       <div>
-        <h4 class="footer-heading">Client Care</h4>
+        <h4 class="footer-heading">User Action</h4>
         <ul class="footer-links">
           <li><a href="#" class="footer-link" onclick="openTrackOrderModal(event)">Track My Order</a></li>
           <li><a href="#" class="footer-link" onclick="openSizeGuideModal()">Sizing & Fit Guide</a></li>
           <li><a href="#" class="footer-link" onclick="showToast('Cash On Delivery is available worldwide.', 'success')">Cash On Delivery Info</a></li>
-          <li><a href="#" class="footer-link" onclick="handleAccountClick()">Client Portal</a></li>
+          <li><a href="#" class="footer-link" onclick="handleAccountClick()">User Portal</a></li>
         </ul>
       </div>
 
       <!-- Col 4: Newsletter -->
       <div>
-        <h4 class="footer-heading">Private Atelier Gazette</h4>
+        <h4 class="footer-heading">Connect With Qalidotae</h4>
         <p style="font-size: 0.8rem; color: #a1a1aa; margin-bottom: 12px;">
-          Receive bespoke seasonal lookbooks and private fabric invitations.
+          Receive newest seasonal lookbooks and fashion updates.
         </p>
         <form onsubmit="handleNewsletterSubmit(event)" style="display: flex; gap: 6px;">
           <input type="email" class="form-input" placeholder="Your email address" required style="background: #18181f; border-color: rgba(255,255,255,0.15); font-size: 0.8rem;" />
@@ -784,10 +802,10 @@
     </div>
 
     <div class="footer-bottom">
-      <div>&copy; 2026 QALIDOTAE LUXURY ATELIER LLC. All Rights Reserved.</div>
+      <div>&copy; QALIDOTAE MODERN ARABIC FASHION CLOTHES. All Rights Reserved.</div>
       <div style="display: flex; gap: 20px;">
         <span style="cursor: pointer;" onclick="openCurrencyModal()">Currency: <strong id="footerCurrencyDisplay">AED (🇦🇪)</strong></span>
-        <span>Made with royal perfection</span>
+        <span>Made by _mhd_cnan</span>
       </div>
     </div>
   </footer>

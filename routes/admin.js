@@ -7,6 +7,7 @@ var Product = require('../models/Product');
 var User = require('../models/User');
 var Order = require('../models/Order');
 var PaymentSetup = require('../models/PaymentSetup');
+var {connectDB} = require('../models');
 
 var {
   createSessionToken,
@@ -33,7 +34,7 @@ function validateImageSize(base64Str) {
 router.get('/', requireAdminAuth, function (req, res, next) {
   res.render('admin', {
     layout: false,
-    title: 'Qalidotae — Atelier Admin Portal',
+    title: 'Qalidotae — Admin Dashboard',
     isAuthenticated: !!req.admin,
     admin: req.admin ? {
       id: req.admin._id,
@@ -49,6 +50,7 @@ router.get('/', requireAdminAuth, function (req, res, next) {
    ========================================================================= */
 router.post('/login', async function (req, res) {
   try {
+    await connectDB();
     var { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Please provide both email and password.' });
@@ -121,6 +123,7 @@ router.get('/api/me', requireAdminApi, function (req, res) {
    ========================================================================= */
 router.get('/api/credentials', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var admin = await Admin.findById(req.admin._id).select('-password');
     return res.json({ success: true, admin: admin });
   } catch (err) {
@@ -130,6 +133,7 @@ router.get('/api/credentials', requireAdminApi, async function (req, res) {
 
 router.put('/api/credentials', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var { name, email, currentPassword, newPassword } = req.body;
     var admin = await Admin.findById(req.admin._id);
     if (!admin) {
@@ -215,12 +219,14 @@ router.get('/api/overview', requireAdminApi, async function (req, res) {
       Order.find().sort({ createdAt: -1 }).limit(5).populate('userId').populate('items.productId'),
       Product.find({ totalStock: { $lte: 5 }, archive: false }).limit(6)
     ]);
+    await connectDB();
 
-    // Calculate total revenue from successful + confirmed + ongoing orders
+    // Calculate total revenue from successful orders only.
     var revenueAgg = await Order.aggregate([
-      { $match: { status: { $in: ['delivery success', 'order confirmed', 'delivery ongoing'] } } },
+      { $match: { status: { $in: ['delivery success'] } } },
       { $group: { _id: null, total: { $sum: '$totalPrice' } } }
-    ]);
+    ]); //for add other { $in:['delivery sucess','order confirmed','delivery ongoing']}
+
     var totalRevenue = revenueAgg.length > 0 ? revenueAgg[0].total : 0;
 
     return res.json({
@@ -253,6 +259,7 @@ router.get('/api/overview', requireAdminApi, async function (req, res) {
    ========================================================================= */
 router.get('/api/products', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var products = await Product.find().sort({ createdAt: -1 });
     return res.json({ success: true, products: products });
   } catch (err) {
@@ -262,6 +269,7 @@ router.get('/api/products', requireAdminApi, async function (req, res) {
 
 router.get('/api/products/:id', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ success: false, message: 'Product not found.' });
     return res.json({ success: true, product: product });
@@ -272,6 +280,7 @@ router.get('/api/products/:id', requireAdminApi, async function (req, res) {
 
 router.post('/api/products', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var {
       name,
       price,
@@ -346,6 +355,7 @@ router.post('/api/products', requireAdminApi, async function (req, res) {
 
 router.put('/api/products/:id', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ success: false, message: 'Product not found.' });
 
@@ -410,6 +420,7 @@ router.put('/api/products/:id', requireAdminApi, async function (req, res) {
 
 router.patch('/api/products/:id/archive', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ success: false, message: 'Product not found.' });
 
@@ -427,6 +438,7 @@ router.patch('/api/products/:id/archive', requireAdminApi, async function (req, 
 
 router.delete('/api/products/:id', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var product = await Product.findByIdAndDelete(req.params.id);
     if (!product) return res.status(404).json({ success: false, message: 'Product not found.' });
     return res.json({ success: true, message: 'Product deleted successfully.' });
@@ -440,6 +452,7 @@ router.delete('/api/products/:id', requireAdminApi, async function (req, res) {
    ========================================================================= */
 router.get('/api/users', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     // Admin is permitted to view password as per requirement 2
     var users = await User.find().sort({ createdAt: -1 });
     return res.json({ success: true, users: users });
@@ -450,6 +463,7 @@ router.get('/api/users', requireAdminApi, async function (req, res) {
 
 router.get('/api/users/:id', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
     return res.json({ success: true, user: user });
@@ -460,6 +474,7 @@ router.get('/api/users/:id', requireAdminApi, async function (req, res) {
 
 router.put('/api/users/:id', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
 
@@ -500,6 +515,7 @@ router.put('/api/users/:id', requireAdminApi, async function (req, res) {
 
 router.delete('/api/users/:id', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
     return res.json({ success: true, message: 'User deleted successfully.' });
@@ -513,6 +529,7 @@ router.delete('/api/users/:id', requireAdminApi, async function (req, res) {
    ========================================================================= */
 router.get('/api/orders', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     // Populate normalized references to User and Product items
     var orders = await Order.find()
       .populate('userId')
@@ -527,6 +544,7 @@ router.get('/api/orders', requireAdminApi, async function (req, res) {
 
 router.get('/api/orders/:id', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var order = await Order.findById(req.params.id)
       .populate('userId')
       .populate('items.productId');
@@ -540,6 +558,7 @@ router.get('/api/orders/:id', requireAdminApi, async function (req, res) {
 
 router.put('/api/orders/:id/status', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ success: false, message: 'Order not found.' });
 
@@ -578,6 +597,7 @@ router.put('/api/orders/:id/status', requireAdminApi, async function (req, res) 
 
 router.delete('/api/orders/:id', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var order = await Order.findByIdAndDelete(req.params.id);
     if (!order) return res.status(404).json({ success: false, message: 'Order not found.' });
     return res.json({ success: true, message: 'Order deleted successfully.' });
@@ -591,6 +611,7 @@ router.delete('/api/orders/:id', requireAdminApi, async function (req, res) {
    ========================================================================= */
 router.get('/api/payment-setup', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var setup = await PaymentSetup.findOne();
     if (!setup) {
       setup = await PaymentSetup.create({
@@ -607,6 +628,7 @@ router.get('/api/payment-setup', requireAdminApi, async function (req, res) {
 
 router.post('/api/payment-setup', requireAdminApi, async function (req, res) {
   try {
+    await connectDB();
     var {
       qrCodeImage,
       upiId,

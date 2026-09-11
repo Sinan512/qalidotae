@@ -1,7 +1,7 @@
 var crypto = require('crypto');
 var User = require('../models/User');
-
-var SECRET = process.env.USER_SESSION_SECRET || 'qalidotae_luxury_user_secret_key_2026';
+var {connectDB} = ('../models');
+var SECRET = process.env.USER_SESSION_SECRET || 'qalidotae_users_secret_key';
 var SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000; // 7 days session expiry
 
 function createUserSessionToken(payload) {
@@ -44,6 +44,7 @@ function verifyUserSessionToken(token) {
   if (!payload || !payload.userId) return null;
 
   try {
+    await connectDB();
     var user = await User.findById(payload.userId);
     return user;
   } catch (err) {

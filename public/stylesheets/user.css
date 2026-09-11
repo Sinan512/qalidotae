@@ -367,7 +367,6 @@
       letter-spacing: 0.1em;
       text-transform: uppercase;
       padding: 13px 28px;
-      border-radius: var(--radius-sm);
       cursor: pointer;
       transition: var(--transition-smooth);
       box-shadow: 0 4px 16px rgba(212, 175, 55, 0.25);
@@ -388,7 +387,6 @@
       letter-spacing: 0.1em;
       text-transform: uppercase;
       padding: 13px 28px;
-      border-radius: var(--radius-sm);
       cursor: pointer;
       transition: var(--transition-smooth);
       background: var(--bg-surface);
@@ -1823,7 +1821,6 @@
       letter-spacing: 0.1em;
       text-transform: uppercase;
       padding: 14px;
-      border-radius: var(--radius-sm);
       cursor: pointer;
       transition: var(--transition-smooth);
       display: flex;

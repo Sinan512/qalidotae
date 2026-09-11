@@ -2,10 +2,12 @@ var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose');
 var geoip = require('geoip-lite');
+var seo = require('../config/seo');
 
 var Product = require('../models/Product');
 var User = require('../models/User');
 var Order = require('../models/Order');
+var {connectDB} = require('../models');
 
 var {
   createUserSessionToken,
@@ -14,6 +16,7 @@ var {
   optionalUserAuth,
   SEVEN_DAYS_MS
 } = require('../middleware/userAuth');
+const { connect } = require('mongoose');
 
 /* =========================================================================
    GEOIP & FRANKFURTER CURRENCY ENGINE
@@ -22,8 +25,8 @@ var {
 // Country to Currency Mapping
 var COUNTRY_CURRENCY_MAP = {
   IN: { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
-  AE: { code: 'AED', symbol: 'AED', name: 'UAE Dirham' },
   SA: { code: 'SAR', symbol: 'SAR', name: 'Saudi Riyal' },
+  AE: { code: 'AED', symbol: 'AED', name: 'UAE Dirham' },
   QA: { code: 'QAR', symbol: 'QAR', name: 'Qatari Riyal' },
   KW: { code: 'KWD', symbol: 'KWD', name: 'Kuwaiti Dinar' },
   OM: { code: 'OMR', symbol: 'OMR', name: 'Omani Rial' },
@@ -49,8 +52,8 @@ var COUNTRY_CURRENCY_MAP = {
 // Fallback rates from INR (approximate base rates when API is loading/offline)
 var DEFAULT_INR_RATES = {
   INR: 1.0,
-  AED: 0.044,     // 1 INR ≈ 0.044 AED (or 1 AED ≈ 22.7 INR)
   SAR: 0.045,     // 1 INR ≈ 0.045 SAR
+  AED: 0.044,     // 1 INR ≈ 0.044 AED (or 1 AED ≈ 22.7 INR)
   QAR: 0.044,     // 1 INR ≈ 0.044 QAR
   KWD: 0.0037,    // 1 INR ≈ 0.0037 KWD
   OMR: 0.0046,    // 1 INR ≈ 0.0046 OMR
@@ -67,9 +70,9 @@ var DEFAULT_INR_RATES = {
 
 // Fixed USD peg multipliers for Middle East currencies
 var USD_PEG = {
-  AED: 3.6725,
   SAR: 3.75,
   QAR: 3.64,
+  AED: 3.6725,
   KWD: 0.307,
   OMR: 0.385,
   BHD: 0.376
@@ -153,7 +156,12 @@ function getClientIp(req) {
 router.get('/', optionalUserAuth, function (req, res, next) {
   res.render('user', {
     layout: false,
-    title: 'Qalidotae — Luxury Arabic Fashion & Atelier',
+    title: seo.defaultTitle,
+    canonical: seo.canonicalUrl,
+    description: seo.defaultDescription,
+    siteUrl: seo.siteUrl,
+    siteName: seo.siteName,
+    logo: seo.defaultImage,
     isFullCatalog: false,
     user: req.user ? {
       id: req.user._id,
@@ -167,10 +175,15 @@ router.get('/', optionalUserAuth, function (req, res, next) {
   });
 });
 
-router.get(['/products', '/user-product-view'], optionalUserAuth, function (req, res, next) {
+router.get(['/products', '/user-product-view'], function (req, res, next) {
   res.render('user-product-view', {
     layout: false,
-    title: 'Curated Atelier Garment Catalog — Qalidotae',
+    title: seo.defaultTitle,
+    canonical: seo.canonicalUrl+'products',
+    description: seo.defaultDescription,
+    siteUrl: seo.siteUrl,
+    siteName: seo.siteName,
+    logo: seo.defaultImage,
     isFullCatalog: true,
     initialType: req.query.type || 'all',
     initialColor: req.query.color || 'all',
@@ -198,7 +211,7 @@ router.get('/api/geo-currency', async function (req, res) {
     var geo = geoip.lookup(clientIp);
 
     // Default to UAE or India if local/unknown
-    var countryCode = (geo && geo.country) ? geo.country.toUpperCase() : 'AE';
+    var countryCode = (geo && geo.country) ? geo.country.toUpperCase() : 'IN';
     var countryName = (geo && geo.city) ? `${geo.city}, ${countryCode}` : (countryCode === 'AE' ? 'United Arab Emirates' : (countryCode === 'IN' ? 'India' : countryCode));
 
     var targetCurrency = COUNTRY_CURRENCY_MAP[countryCode] || { code: 'USD', symbol: '$', name: 'US Dollar' };
@@ -207,13 +220,13 @@ router.get('/api/geo-currency', async function (req, res) {
     var rateFromINR = allRates[targetCurrency.code] || DEFAULT_INR_RATES[targetCurrency.code] || 0.012;
 
     var supportedCurrenciesList = [
-      { code: 'AED', symbol: 'AED', name: 'UAE Dirham', flag: '🇦🇪', rateFromINR: allRates.AED || DEFAULT_INR_RATES.AED },
+      { code: 'INR', symbol: '₹', name: 'Indian Rupee', flag: '🇮🇳', rateFromINR: 1.0 },
       { code: 'SAR', symbol: 'SAR', name: 'Saudi Riyal', flag: '🇸🇦', rateFromINR: allRates.SAR || DEFAULT_INR_RATES.SAR },
+      { code: 'AED', symbol: 'AED', name: 'UAE Dirham', flag: '🇦🇪', rateFromINR: allRates.AED || DEFAULT_INR_RATES.AED },
       { code: 'QAR', symbol: 'QAR', name: 'Qatari Riyal', flag: '🇶🇦', rateFromINR: allRates.QAR || DEFAULT_INR_RATES.QAR },
       { code: 'KWD', symbol: 'KWD', name: 'Kuwaiti Dinar', flag: '🇰🇼', rateFromINR: allRates.KWD || DEFAULT_INR_RATES.KWD },
       { code: 'OMR', symbol: 'OMR', name: 'Omani Rial', flag: '🇴🇲', rateFromINR: allRates.OMR || DEFAULT_INR_RATES.OMR },
       { code: 'BHD', symbol: 'BHD', name: 'Bahraini Dinar', flag: '🇧🇭', rateFromINR: allRates.BHD || DEFAULT_INR_RATES.BHD },
-      { code: 'INR', symbol: '₹', name: 'Indian Rupee', flag: '🇮🇳', rateFromINR: 1.0 },
       { code: 'USD', symbol: '$', name: 'US Dollar', flag: '🇺🇸', rateFromINR: allRates.USD || DEFAULT_INR_RATES.USD },
       { code: 'EUR', symbol: '€', name: 'Euro', flag: '🇪🇺', rateFromINR: allRates.EUR || DEFAULT_INR_RATES.EUR },
       { code: 'GBP', symbol: '£', name: 'British Pound', flag: '🇬🇧', rateFromINR: allRates.GBP || DEFAULT_INR_RATES.GBP }
@@ -237,8 +250,8 @@ router.get('/api/geo-currency', async function (req, res) {
     console.error('Geo Currency API Error:', err);
     return res.json({
       success: true,
-      country: 'AE',
-      currency: { code: 'AED', symbol: 'AED', name: 'UAE Dirham', rateFromINR: 0.044 },
+      country: 'IN',
+      currency: { code: 'INR', symbol: '₹', name: 'Indian Rupee', rateFromINR: 1 },
       allRates: DEFAULT_INR_RATES
     });
   }
@@ -306,7 +319,7 @@ router.post('/api/user/signup', async function (req, res) {
       email: user.email
     });
 
-    res.cookie('qalid_user_session', token, {
+    res.cookie('qalidotae_user_session', token, {
       maxAge: SEVEN_DAYS_MS,
       httpOnly: true,
       sameSite: 'lax',
@@ -364,7 +377,7 @@ router.post('/api/user/login', async function (req, res) {
       email: user.email
     });
 
-    res.cookie('qalid_user_session', token, {
+    res.cookie('qalidotae_user_session', token, {
       maxAge: SEVEN_DAYS_MS,
       httpOnly: true,
       sameSite: 'lax',
@@ -397,7 +410,7 @@ router.post('/api/user/login', async function (req, res) {
 
 // User Logout
 router.post('/api/user/logout', function (req, res) {
-  res.clearCookie('qalid_user_session');
+  res.clearCookie('qalidotae_user_session');
   return res.json({ success: true, message: 'Logged out successfully.' });
 });
 
@@ -492,6 +505,7 @@ router.put('/api/user/profile', requireUserAuth, async function (req, res) {
 // Get Products Catalog
 router.get('/api/products', async function (req, res) {
   try {
+    await connectDB()
     var { gender, type, search, sort } = req.query;
     var filter = { archive: false, isAvailable: true };
 
@@ -735,7 +749,7 @@ router.get('/api/orders/track/:orderNumber', async function (req, res) {
         shippingNotes: order.shippingNotes,
         rejectionReason: order.rejectionReason,
         items: (order.items || []).map(item => ({
-          productName: item.productId ? item.productId.name : 'Atelier Garment',
+          productName: item.productId ? item.productId.name : 'Qalidotar Garment',
           productImage: item.productId ? item.productId.frontImage : '',
           productType: item.productId ? item.productId.type : '',
           selectedSize: item.selectedSize,
@@ -766,7 +780,7 @@ router.post('/api/orders/:id/cancel', requireUserAuth, async function (req, res)
     if (order.status !== 'order pending') {
       return res.status(400).json({
         success: false,
-        message: 'Order cannot be cancelled as it is already ' + order.status + '.'
+        message: 'Your Order is already ' + order.status + '.please contact us if you want to cancel the order.'
       });
     }
 
