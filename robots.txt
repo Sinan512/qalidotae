@@ -8,4 +8,4 @@ Disallow: /user/
 Disallow: /login
 Disallow: /signup
 
-Sitemap: htpps://qalidotae-modern-arabic-fashion.vercel.app/sitemap.xml
+Sitemap: https://qalidotae-modern-arabic-fashion.vercel.app/sitemap.xml
