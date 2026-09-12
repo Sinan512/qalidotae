@@ -34,7 +34,7 @@ function validateImageSize(base64Str) {
 router.get('/', requireAdminAuth, function (req, res, next) {
   res.render('admin', {
     layout: false,
-    title: 'Qalidotae — Admin Dashboard',
+    title: 'Qalidotae — Owner Dashboard',
     isAuthenticated: !!req.admin,
     admin: req.admin ? {
       id: req.admin._id,
@@ -60,12 +60,12 @@ router.post('/login', async function (req, res) {
     var admin = await Admin.findOne({ email: cleanEmail });
 
     if (!admin) {
-      return res.status(401).json({ success: false, message: 'Invalid admin credentials.' });
+      return res.status(401).json({ success: false, message: 'Invalid Owner credentials.' });
     }
 
     var isMatch = await admin.comparePassword(password);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid admin credentials.' });
+      return res.status(401).json({ success: false, message: 'Invalid Owner credentials.' });
     }
 
     admin.lastLogin = new Date();
@@ -137,7 +137,7 @@ router.put('/api/credentials', requireAdminApi, async function (req, res) {
     var { name, email, currentPassword, newPassword } = req.body;
     var admin = await Admin.findById(req.admin._id);
     if (!admin) {
-      return res.status(404).json({ success: false, message: 'Admin account not found.' });
+      return res.status(404).json({ success: false, message: 'Owner account not found.' });
     }
 
     if (newPassword) {
@@ -171,7 +171,7 @@ router.put('/api/credentials', requireAdminApi, async function (req, res) {
 
     return res.json({
       success: true,
-      message: 'Admin credentials updated successfully.',
+      message: 'Owner credentials updated successfully.',
       admin: {
         id: admin._id,
         email: admin.email,
@@ -581,7 +581,7 @@ router.put('/api/orders/:id/status', requireAdminApi, async function (req, res) 
 
     order.status = status;
     if (status === 'order rejected') {
-      order.rejectionReason = rejectionReason || 'Order rejected by administration.';
+      order.rejectionReason = rejectionReason || 'Order rejected by Qalidotae Owner.';
     } else {
       if (rejectionReason !== undefined) order.rejectionReason = rejectionReason;
     }

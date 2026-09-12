@@ -60,7 +60,7 @@
         </div>
         <div class="nav-item" onclick="switchSection('credentials')">
           <i data-lucide="shield-check"></i>
-          <span>Admin Account</span>
+          <span>Owner Account</span>
         </div>
       </nav>
 
@@ -179,7 +179,7 @@
                     <thead>
                       <tr>
                         <th>Order #</th>
-                        <th>Client</th>
+                        <th>User</th>
                         <th>Amount</th>
                         <th>Status</th>
                       </tr>
@@ -354,7 +354,7 @@
             <div class="controls-left">
               <div class="search-box">
                 <i data-lucide="search" class="search-icon"></i>
-                <input type="text" id="orderSearchInput" class="form-input" placeholder="Search order ID, client name, email..." oninput="filterAndRenderOrders()">
+                <input type="text" id="orderSearchInput" class="form-input" placeholder="Search order ID, User name, email..." oninput="filterAndRenderOrders()">
               </div>
 
               <select id="orderStatusFilter" class="filter-select" onchange="filterAndRenderOrders()">
@@ -493,7 +493,7 @@
           <div class="card" style="max-width: 750px;">
             <div class="card-header">
               <div>
-                <h3 class="card-title">Admin Account Credentials</h3>
+                <h3 class="card-title">Owner Account Credentials</h3>
                 <div class="card-subtitle">Manage owner details access and login password</div>
               </div>
             </div>
@@ -559,12 +559,12 @@
 
       <form id="adminLoginForm" onsubmit="event.preventDefault(); handleLogin();">
         <div class="form-group">
-          <label class="form-label">Admin Email</label>
+          <label class="form-label">Owner Email</label>
           <input type="email" id="loginEmail" class="form-input" placeholder="admin@qalidotae.com" required autocomplete="email">
         </div>
 
         <div class="form-group">
-          <label class="form-label">Admin Password</label>
+          <label class="form-label">Owner Password</label>
           <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required autocomplete="current-password">
         </div>
 
@@ -1001,10 +1001,10 @@
         users: 'User Profiles',
         orders: 'Orders',
         payment: 'Payment Settings',
-        credentials: 'Admin Credentials'
+        credentials: 'Owner Credentials'
       };
       const titleEl = document.getElementById('currentSectionTitle');
-      if (titleEl) titleEl.innerText = titles[sectionId] || 'Atelier Console';
+      if (titleEl) titleEl.innerText = titles[sectionId] || 'Qalidotae Console';
 
       // Close mobile sidebar if open
       toggleSidebar(false);
@@ -1580,7 +1580,7 @@
                 <button class="icon-btn gold" title="View / Edit Profile" onclick="openUserModal('${u._id}')">
                   <i data-lucide="edit-2"></i>
                 </button>
-                <button class="icon-btn danger" title="Delete Client" onclick="confirmDeleteUser('${u._id}', '${u.fullName.replace(/'/g, "\\'")}')">
+                <button class="icon-btn danger" title="Delete User" onclick="confirmDeleteUser('${u._id}', '${u.fullName.replace(/'/g, "\\'")}')">
                   <i data-lucide="trash-2"></i>
                 </button>
               </div>
@@ -1844,7 +1844,7 @@
 
       // Populate Client Info
       document.getElementById('orderModalClientInfo').innerHTML = `
-        <div style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;">${client.fullName || 'Unknown Client'}</div>
+        <div style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;">${client.fullName || 'Unknown User'}</div>
         <div><strong>Email:</strong> <a href="mailto:${client.email}" style="color: var(--gold-primary);">${client.email || '—'}</a></div>
         <div><strong>Phone:</strong> ${client.phoneNumber || '—'}</div>
         <div><strong>WhatsApp:</strong> ${client.whatsappNumber || '—'}</div>
@@ -2100,7 +2100,7 @@
         });
         const result = await res.json();
         if (result.success) {
-          showToast('Admin credentials updated successfully in ADMIN_CREDINTIALS.', 'success');
+          showToast('Owner credentials updated successfully.', 'success');
           document.getElementById('credCurrentPassword').value = '';
           document.getElementById('credNewPassword').value = '';
           document.getElementById('credConfirmPassword').value = '';
@@ -2138,20 +2138,20 @@
         const data = await res.json();
 
         if (data.success) {
-          showToast('Welcome to Qalidotae Atelier Admin.', 'success');
+          showToast('Welcome to Qalidotae Owner Dashboard.', 'success');
           setTimeout(() => {
             window.location.reload();
           }, 600);
         } else {
           showToast(data.message || 'Invalid credentials.', 'error');
           btn.disabled = false;
-          btn.innerHTML = `<i data-lucide="lock"></i><span>Enter Atelier Portal</span>`;
+          btn.innerHTML = `<i data-lucide="lock"></i><span>Enter Owner Dashboard</span>`;
           lucide.createIcons();
         }
       } catch (err) {
         showToast('Network error during login: ' + err.message, 'error');
         btn.disabled = false;
-        btn.innerHTML = `<i data-lucide="lock"></i><span>Enter Owner Portal</span>`;
+        btn.innerHTML = `<i data-lucide="lock"></i><span>Enter Owner Dashboard</span>`;
         lucide.createIcons();
       }
     }

@@ -233,7 +233,7 @@
       if (topFlag) topFlag.innerText = state.currency.flag || '🇮🇳';
       if (topCode) topCode.innerText = state.currency.code;
       if (mobCode) mobCode.innerText = state.currency.code;
-      if (footCurr) footCurr.innerText = `${state.currency.code} (${state.currency.flag || '🇦🇪'})`;
+      if (footCurr) footCurr.innerText = `${state.currency.code} (${state.currency.flag || '🇮🇳'})`;
 
       renderProductsGrid();
       renderCart();
@@ -900,7 +900,7 @@
       const itemsToDisplay = state.filteredProducts.slice(0, state.displayedCount);
 
       if (subtitle) {
-        subtitle.innerText = `Displaying ${itemsToDisplay.length} of ${totalMatches} master bespoke garment${totalMatches === 1 ? '' : 's'}`;
+        subtitle.innerText = `Displaying ${itemsToDisplay.length} of ${totalMatches} Collection${totalMatches === 1 ? '' : 's'}`;
       }
 
       if (totalMatches === 0) {
