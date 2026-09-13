@@ -5,5 +5,5 @@ module.exports = {
     canonicalUrl: "https://qalidotae-modern-arabic-fashion.vercel.app/",
     defaultTitle:"Qalidotae | modern arabic fashion dresses & thobes",
     defaultDescription:"Qalidotae - modern thobe and abaya. Premium handcrafted Emirati, Moroccan, and Saudi garments, made with pure silk and spun cotton with worldwide Cash On Delivery.",
-    defaultImage:"/logo.png"
+    defaultImage:"/favico.png"
 };
