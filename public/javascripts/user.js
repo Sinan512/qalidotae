@@ -141,6 +141,63 @@
     }
 
     /* =========================================================================
+       HERO 3D STAGE MOUSE PARALLAX & TILT CONTROLLER
+       ========================================================================= */
+    function initHero3dParallax() {
+      const heroSection = document.getElementById('hero3dSection');
+      const stage = document.getElementById('hero3dStage');
+      if (!heroSection || !stage) return;
+
+      if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+        return;
+      }
+
+      let currentX = 0;
+      let currentY = 0;
+      let targetX = 0;
+      let targetY = 0;
+      let isHovering = false;
+      let animFrameId = null;
+
+      function renderParallax() {
+        currentX += (targetX - currentX) * 0.08;
+        currentY += (targetY - currentY) * 0.08;
+
+        const rotateY = currentX * 14;
+        const rotateX = -currentY * 12;
+
+        stage.style.transform = `rotateY(${rotateY.toFixed(2)}deg) rotateX(${rotateX.toFixed(2)}deg)`;
+
+        if (isHovering || Math.abs(targetX - currentX) > 0.001 || Math.abs(targetY - currentY) > 0.001) {
+          animFrameId = requestAnimationFrame(renderParallax);
+        } else {
+          stage.style.transform = '';
+          animFrameId = null;
+        }
+      }
+
+      heroSection.addEventListener('mousemove', (e) => {
+        const rect = heroSection.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        targetX = (x / rect.width) * 2 - 1;
+        targetY = (y / rect.height) * 2 - 1;
+        isHovering = true;
+
+        if (!animFrameId) {
+          animFrameId = requestAnimationFrame(renderParallax);
+        }
+      });
+
+      heroSection.addEventListener('mouseleave', () => {
+        targetX = 0;
+        targetY = 0;
+        isHovering = false;
+      });
+    }
+
+    /* =========================================================================
        INITIALIZATION
        ========================================================================= */
     document.addEventListener('DOMContentLoaded', async () => {
@@ -149,6 +206,7 @@
       lucide.createIcons();
       updateCartBadge();
       initTrustBarRotator();
+      initHero3dParallax();
 
       // Parallel init: Check user session, GeoIP & Currency, Fetch products
       await Promise.all([

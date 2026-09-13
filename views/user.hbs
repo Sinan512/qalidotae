@@ -151,24 +151,122 @@
     </aside>
   </div>
 
-  <!-- 3. HERO EDITORIAL SECTION -->
-  <section class="hero-section">
-    <div class="hero-container">
-      <span class="hero-subtitle"> Heritage Reframed for the Modern Era</span>
-      <h1 class="hero-title">The Pinnacle of <em>Middle Eastern</em> Luxury</h1>
-      <p class="hero-description">
-        Bridges the gap between classic Arabic drapery, intricate embroidery, and modern minimalist silhouettes. Designed for those who express identity through bold, refined wardrobe choices.
-      </p>
-      <div class="hero-cta-group">
-        <button class="btn-gold" onclick="filterByGender('men')">
-          <span>Explore Men's Thobes</span>
-          <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-        </button>
-        <button class="btn-outline" onclick="filterByGender('women')">
-          <span>Explore Women's Abayas</span>
-        </button>
+  <!-- 3. MASSIVE 3D ANIMATED HERO SECTION -->
+  <section class="hero-section hero-3d-section" id="hero3dSection">
+    <!-- Atmospheric 3D Lighting & Backdrop -->
+    <div class="hero-3d-backdrop" aria-hidden="true">
+      <div class="glow-orb glow-orb-1"></div>
+      <div class="glow-orb glow-orb-2"></div>
+      <div class="glow-orb glow-orb-3"></div>
+      <div class="hero-geometric-mesh"></div>
+      <div class="hero-particles-layer">
+        <span class="hero-particle particle-1"></span>
+        <span class="hero-particle particle-2"></span>
+        <span class="hero-particle particle-3"></span>
+        <span class="hero-particle particle-4"></span>
       </div>
     </div>
+
+    <div class="hero-container hero-3d-layout">
+      <!-- Left Column: Editorial Content & CTAs -->
+      <div class="hero-editorial-col">
+        <div class="hero-badge-pill">
+          <span class="hero-subtitle">Heritage Reframed for the Modern Era</span>
+        </div>
+        
+        <h1 class="hero-title">
+          The Pinnacle of <br class="hero-title-break" />
+          <span class="gold-gradient-text"><em>Middle Eastern</em></span> Luxury
+        </h1>
+
+         <p class="hero-description">
+          Bridges the gap between classic Arabic drapery, intricate embroidery, and modern minimalist silhouettes. Designed for those who express identity through bold, refined wardrobe choices.
+        </p>
+
+    </div>
+
+        <!-- Right Column: 3D Animated Floating Garment Showcase Stage -->
+      <div class="hero-3d-stage-wrapper" id="hero3dStageWrapper">
+        <div class="hero-3d-stage" id="hero3dStage">
+
+          <!-- 3D Card 1: Men's Modern Thobe -->
+          <div class="hero-3d-card card-thobe" onclick="filterByGender('men')" role="button" tabindex="0" title="Explore Men's Modern Thobes">
+            <div class="card-3d-glass-reflect"></div>
+            <div class="card-3d-image-wrap">
+              <img src="/MenLands.png" 
+                   alt="Men's Royal Arabic Thobe" 
+                   class="hero-card-img" 
+                   loading="eager" />
+              <div class="card-image-gradient-overlay"></div>
+            </div>
+
+            <!-- Floating 3D Micro-Tags -->
+            <div class="card-3d-floating-tag tag-top-left">
+              <span class="tag-dot"></span>
+              <span style="font-size: 8px;">Men's Royal Thobe</span>
+            </div>
+
+            <div class="card-3d-floating-tag tag-bottom-pill">
+              <i data-lucide="crown" style="width: 13px; height: 13px; color: var(--gold-primary);"></i>
+              <span>Emirati & Saudi Cuts</span>
+            </div>
+
+            <!-- Card Bottom Info -->
+            <div class="card-3d-content">
+              <span class="card-category-tag">Couture Tailoring</span>
+              <h3 class="card-garment-title">Signature Modern Thobes</h3>
+              <div class="card-action-link">
+                <span>View Men's Line</span>
+                <i data-lucide="arrow-up-right" style="width: 14px; height: 14px;"></i>
+              </div>
+            </div>
+          </div>
+
+           <!-- 3D Card 2: Women's Luxury Abaya & Kaftan -->
+          <div class="hero-3d-card card-abaya" onclick="filterByGender('women')" role="button" tabindex="0" title="Explore Women's Haute Abayas">
+            <div class="card-3d-glass-reflect"></div>
+            <div class="card-3d-image-wrap">
+              <img src="/WomenPort.png" 
+                   alt="Women's Haute Couture Abaya" 
+                   class="hero-card-img" 
+                   loading="eager" />
+              <div class="card-image-gradient-overlay"></div>
+            </div>
+
+            <!-- Floating 3D Micro-Tags -->
+            <div class="card-3d-floating-tag tag-top-right">
+              <span class="tag-dot gold"></span>
+              <span style="font-size: 8px;">Women's Noor Abaya</span>
+            </div>
+
+            <div class="card-3d-floating-tag tag-bottom-pill">
+              <i data-lucide="sparkles" style="width: 13px; height: 13px; color: var(--gold-primary);"></i>
+              <span>Silk Chiffon & Embroidery</span>
+            </div>
+
+            <!-- Card Bottom Info -->
+            <div class="card-3d-content">
+              <span class="card-category-tag">Haute Edition</span>
+              <h3 class="card-garment-title">Graceful Draped Abayas</h3>
+              <div class="card-action-link">
+                <span>View Women's Line</span>
+                <i data-lucide="arrow-up-right" style="width: 14px; height: 14px;"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Central 3D Floating Atelier Seal -->
+          <div class="hero-3d-seal-badge">
+            <div class="seal-inner">
+              <i data-lucide="shopping-bag" class="seal-icon"></i>
+              <span class="seal-brand">QALIDOTAE</span>
+              <span class="seal-desc">ARABIC CLOTHES</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    
   </section>
 
   <!-- 4. TRUST & LUXURY ASSURANCE BAR -->
