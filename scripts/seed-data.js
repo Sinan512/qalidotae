@@ -19,8 +19,8 @@ async function seed() {
 
   // 1. Seed Products if empty or < 20
   var productCount = await db.Product.countDocuments();
-  if (productCount < 20) {
-    console.log('Seeding products (25 luxury items)...');
+  if (productCount < 100) {
+    console.log('Seeding products (100 luxury items)...');
     var sampleProducts = [
       {
         name: 'The Royal Emirati Thobe',
@@ -359,7 +359,20 @@ async function seed() {
         description: 'Rich hand-dyed viscose weave embellished with antique brass beads.'
       },
       {
-        name: 'The Pearl of Kuwait Thobe',
+        name: 'The Pearl of kuwaith Thobe',
+        price: 570,
+        frontImage: createSampleImage('Kuwait Pearl Thobe', '#17181a', '#e2d9c8'),
+        backImage: createSampleImage('Kuwait Pearl Back', '#1c1e21', '#e2d9c8'),
+        type: 'Emirati Thobe',
+        gender: 'men',
+        archive: false,
+        isAvailable: true,
+        availableColours: ['Cream', 'Pure White', 'Ivory'],
+        totalStock: 25,
+        availableSizes: ['S', 'M', 'L', 'XL', 'XXL'],
+        description: 'Subtle luster spun fabric engineered for warm Gulf climates.'
+      },{
+        name: 'The Pearl of INDIA Thobe',
         price: 570,
         frontImage: createSampleImage('Kuwait Pearl Thobe', '#17181a', '#e2d9c8'),
         backImage: createSampleImage('Kuwait Pearl Back', '#1c1e21', '#e2d9c8'),
@@ -374,10 +387,10 @@ async function seed() {
       }
     ];
 
-    if (productCount < 20) {
-      await db.Product.deleteMany({});
+    if (productCount < 100) {
+      // await db.Product.deleteMany({});
       await db.Product.insertMany(sampleProducts);
-      console.log('✅ Seeded 25 Luxury Products in PRODUCTS');
+      console.log('✅ Seeded 100 Luxury Products in PRODUCTS');
     }
   }
 

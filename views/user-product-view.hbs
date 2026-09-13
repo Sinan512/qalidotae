@@ -282,11 +282,98 @@
     
     <!-- Products Grid (Filled Dynamically) -->
     <div class="products-grid" id="productsGridContainer">
-      <!-- Loading Skeleton / Items will be injected here -->
-      <div style="grid-column: 1 / -1; text-align: center; padding: 60px 0; color: var(--text-dim);">
-        <i data-lucide="loader-2" class="spin" style="width: 32px; height: 32px; margin: 0 auto 12px;"></i>
-        <div>Fetching master atelier creations...</div>
-      </div>
+      <!-- Four Product Card Skeleton Templates with Animation Effect -->
+      <article class="product-card skeleton-card" aria-hidden="false">
+        <div class="skeleton-media skeleton-shimmer">
+          <div class="skeleton-badge"></div>
+        </div>
+        <div class="skeleton-content">
+          <div class="skeleton-type skeleton-shimmer"></div>
+          <div class="skeleton-title skeleton-shimmer"></div>
+          <div class="skeleton-sizes">
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+          </div>
+          <div class="skeleton-footer">
+            <div class="skeleton-price-group">
+              <div class="skeleton-price skeleton-shimmer"></div>
+              <div class="skeleton-subprice skeleton-shimmer"></div>
+            </div>
+            <div class="skeleton-action skeleton-shimmer"></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="product-card skeleton-card" aria-hidden="true">
+        <div class="skeleton-media skeleton-shimmer">
+          <div class="skeleton-badge"></div>
+        </div>
+        <div class="skeleton-content">
+          <div class="skeleton-type skeleton-shimmer"></div>
+          <div class="skeleton-title skeleton-shimmer" style="width: 65%;"></div>
+          <div class="skeleton-sizes">
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+          </div>
+          <div class="skeleton-footer">
+            <div class="skeleton-price-group">
+              <div class="skeleton-price skeleton-shimmer"></div>
+              <div class="skeleton-subprice skeleton-shimmer"></div>
+            </div>
+            <div class="skeleton-action skeleton-shimmer"></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="product-card skeleton-card" aria-hidden="true">
+        <div class="skeleton-media skeleton-shimmer">
+          <div class="skeleton-badge"></div>
+        </div>
+        <div class="skeleton-content">
+          <div class="skeleton-type skeleton-shimmer"></div>
+          <div class="skeleton-title skeleton-shimmer" style="width: 75%;"></div>
+          <div class="skeleton-sizes">
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+          </div>
+          <div class="skeleton-footer">
+            <div class="skeleton-price-group">
+              <div class="skeleton-price skeleton-shimmer"></div>
+              <div class="skeleton-subprice skeleton-shimmer"></div>
+            </div>
+            <div class="skeleton-action skeleton-shimmer"></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="product-card skeleton-card" aria-hidden="true">
+        <div class="skeleton-media skeleton-shimmer">
+          <div class="skeleton-badge"></div>
+        </div>
+        <div class="skeleton-content">
+          <div class="skeleton-type skeleton-shimmer"></div>
+          <div class="skeleton-title skeleton-shimmer" style="width: 70%;"></div>
+          <div class="skeleton-sizes">
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+            <span class="skeleton-size-pill skeleton-shimmer"></span>
+          </div>
+          <div class="skeleton-footer">
+            <div class="skeleton-price-group">
+              <div class="skeleton-price skeleton-shimmer"></div>
+              <div class="skeleton-subprice skeleton-shimmer"></div>
+            </div>
+            <div class="skeleton-action skeleton-shimmer"></div>
+          </div>
+        </div>
+      </article>
     </div>
 
     <!-- Progressive Load Sentinel & Infinite Scroll Loader -->

@@ -235,7 +235,6 @@
       if (mobCode) mobCode.innerText = state.currency.code;
       if (footCurr) footCurr.innerText = `${state.currency.code} (${state.currency.flag || '🇮🇳'})`;
 
-      renderProductsGrid();
       renderCart();
     }
 
@@ -302,8 +301,42 @@
     }
 
     /* =========================================================================
-       PRODUCTS CATALOG FETCH & DUAL FILTERING (TYPE & COLOUR)
-       ========================================================================= */
+           PRODUCTS CATALOG FETCH & DUAL FILTERING (TYPE & COLOUR)
+        ========================================================================= */
+    function getSkeletonCardsHtml(count = 4) {
+      let html = '';
+      const titleWidths = ['78%', '65%', '75%', '70%'];
+      const pillCounts = [4, 3, 5, 4];
+      for (let i = 0; i < count; i++) {
+        const titleWidth = titleWidths[i % 4];
+        const countPills = pillCounts[i % 4];
+        let pillsHtml = '';
+        for (let p = 0; p < countPills; p++) {
+          pillsHtml += '<span class="skeleton-size-pill skeleton-shimmer"></span>';
+        }
+        html += `
+          <article class="product-card skeleton-card" aria-hidden="true">
+            <div class="skeleton-media skeleton-shimmer">
+              <div class="skeleton-badge"></div>
+            </div>
+            <div class="skeleton-content">
+              <div class="skeleton-type skeleton-shimmer"></div>
+              <div class="skeleton-title skeleton-shimmer" style="width: ${titleWidth};"></div>
+              <div class="skeleton-sizes">${pillsHtml}</div>
+              <div class="skeleton-footer">
+                <div class="skeleton-price-group">
+                  <div class="skeleton-price skeleton-shimmer"></div>
+                  <div class="skeleton-subprice skeleton-shimmer"></div>
+                </div>
+                <div class="skeleton-action skeleton-shimmer"></div>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+      return html;
+    }
+
     async function fetchProducts() {
       try {
         const res = await fetch('/api/products');

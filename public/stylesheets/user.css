@@ -1293,6 +1293,169 @@
       cursor: pointer;
     }
 
+    /* SKELETON LOADING CARD TEMPLATES & SHIMMER EFFECT */
+    .product-card.skeleton-card {
+      pointer-events: none;
+      cursor: default;
+      user-select: none;
+      animation: skeletonPulse 2s ease-in-out infinite;
+    }
+
+    .product-card.skeleton-card:nth-child(1) { animation-delay: 0s; }
+    .product-card.skeleton-card:nth-child(2) { animation-delay: 0.15s; }
+    .product-card.skeleton-card:nth-child(3) { animation-delay: 0.3s; }
+    .product-card.skeleton-card:nth-child(4) { animation-delay: 0.45s; }
+
+    .skeleton-card .skeleton-media {
+      position: relative;
+      width: 100%;
+      padding-top: 133.33%; /* 3:4 Aspect Ratio matching .product-media-wrap */
+      background: var(--bg-surface-elevated);
+      overflow: hidden;
+    }
+
+    .skeleton-card .skeleton-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      width: 52px;
+      height: 18px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      z-index: 2;
+    }
+
+    .skeleton-card .skeleton-content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .skeleton-card .skeleton-type {
+      width: 32%;
+      height: 11px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+    }
+
+    .skeleton-card .skeleton-title {
+      width: 78%;
+      height: 18px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      margin: 2px 0 4px;
+    }
+
+    .skeleton-card .skeleton-sizes {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+
+    .skeleton-card .skeleton-size-pill {
+      width: 24px;
+      height: 16px;
+      border-radius: 3px;
+      background: var(--bg-input);
+      display: inline-block;
+    }
+
+    .skeleton-card .skeleton-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding-top: 8px;
+    }
+
+    .skeleton-card .skeleton-price-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .skeleton-card .skeleton-price {
+      width: 76px;
+      height: 16px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+    }
+
+    .skeleton-card .skeleton-subprice {
+      width: 105px;
+      height: 9px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+    }
+
+    .skeleton-card .skeleton-action {
+      width: 52px;
+      height: 14px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+    }
+
+    /* Shimmer Wave Animation */
+    .skeleton-shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skeleton-shimmer::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.04) 20%,
+        rgba(212, 175, 55, 0.15) 50%,
+        rgba(255, 255, 255, 0.04) 80%,
+        transparent 100%
+      );
+      transform: translateX(-100%);
+      animation: skeletonWave 1.6s ease-in-out infinite;
+    }
+
+    html[data-theme="light"] .skeleton-shimmer::after {
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(0, 0, 0, 0.03) 20%,
+        rgba(212, 175, 55, 0.2) 50%,
+        rgba(0, 0, 0, 0.03) 80%,
+        transparent 100%
+      );
+    }
+
+    .product-card.skeleton-card:nth-child(1) .skeleton-shimmer::after { animation-delay: 0s; }
+    .product-card.skeleton-card:nth-child(2) .skeleton-shimmer::after { animation-delay: 0.15s; }
+    .product-card.skeleton-card:nth-child(3) .skeleton-shimmer::after { animation-delay: 0.3s; }
+    .product-card.skeleton-card:nth-child(4) .skeleton-shimmer::after { animation-delay: 0.45s; }
+
+    @keyframes skeletonWave {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    @keyframes skeletonPulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.7;
+      }
+    }
+
     .product-card:hover {
       transform: translateY(-6px);
       border-color: var(--card-hover-border);
