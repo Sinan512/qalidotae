@@ -4,11 +4,11 @@
     const state = {
       theme: localStorage.getItem('qalid_theme') || 'dark',
       currency: {
-        code: 'AED',
-        symbol: 'AED',
-        name: 'UAE Dirham',
-        flag: '🇦🇪',
-        rateFromINR: 0.044
+        code: 'INR',
+        symbol: '₹',
+        name: 'Indian Rupee',
+        flag: '🇮🇳',
+        rateFromINR: 1.0
       },
       allRates: {},
       supportedCurrencies: [],
@@ -85,6 +85,7 @@
     }
 
     let scrollObserver = null;
+    let currencyRefreshTimer = null;
 
     /* URL PARAMS INITIALIZATION */
     function initURLParams() {
@@ -271,10 +272,14 @@
         const res = await fetch('/api/geo-currency');
         const data = await res.json();
         if (data.success && data.currency) {
-          state.currency = data.currency;
           state.allRates = data.allRates || {};
           state.supportedCurrencies = data.supportedCurrencies || [];
 
+          // Product prices are stored in INR and INR is the storefront default.
+          // Geo-location only supplies the exchange-rate list; it must not
+          // silently replace the customer's initial currency selection.
+          const inrCurrency = state.supportedCurrencies.find(c => c.code === 'INR');
+          if (inrCurrency) state.currency = inrCurrency;
           updateCurrencyUI();
         }
       } catch (err) {
@@ -294,6 +299,7 @@
       if (footCurr) footCurr.innerText = `${state.currency.code} (${state.currency.flag || '🇮🇳'})`;
 
       renderCart();
+      refreshCurrencyDependentViews();
     }
 
     function convertInrToCurrent(priceInINR) {
@@ -309,6 +315,42 @@
     function formatPrice(priceInINR) {
       const converted = convertInrToCurrent(priceInINR);
       return `${state.currency.code} ${converted.toLocaleString()}`;
+    }
+
+    function updateSelectedProductPrice() {
+      if (!state.selectedProduct) return;
+
+      const priceElement = document.getElementById('detailPriceMain');
+      if (priceElement) {
+        priceElement.innerText = formatPrice(state.selectedProduct.price);
+      }
+    }
+
+    function refreshCurrencyDependentViews() {
+      const container = document.getElementById('productsGridContainer');
+
+      updateSelectedProductPrice();
+      if (!container || state.products.length === 0) return;
+
+      if (currencyRefreshTimer) {
+        clearTimeout(currencyRefreshTimer);
+      }
+      if (scrollObserver) {
+        scrollObserver.disconnect();
+      }
+
+      // Keep the same product dummy cards visible while the prices are
+      // recalculated, instead of flashing an empty grid or a plain spinner.
+      container.setAttribute('aria-busy', 'true');
+      container.innerHTML = getSkeletonCardsHtml(4);
+      lucide.createIcons();
+
+      currencyRefreshTimer = setTimeout(() => {
+        renderProductsGrid();
+        container.removeAttribute('aria-busy');
+        currencyRefreshTimer = null;
+        updateSelectedProductPrice();
+      }, 300);
     }
 
     function openCurrencyModal() {
@@ -347,7 +389,13 @@
       if (match) {
         state.currency = match;
       } else {
-        state.currency = { code: code, symbol: code, name: code, rateFromINR: state.allRates[code] || 0.012 };
+        state.currency = {
+          code: code,
+          symbol: code,
+          name: code,
+          flag: '🌐',
+          rateFromINR: state.allRates[code] || 0.012
+        };
       }
       closeCurrencyModal();
       updateCurrencyUI();
@@ -1317,7 +1365,7 @@
           <h2 class="detail-name">${product.name}</h2>
 
           <div class="detail-price-row">
-            <span class="detail-price-main">${formatPrice(product.price)}</span>
+            <span class="detail-price-main" id="detailPriceMain">${formatPrice(product.price)}</span>
             <span class="detail-price-inr">(Base: ₹${product.price.toLocaleString()} INR)</span>
           </div>
 
