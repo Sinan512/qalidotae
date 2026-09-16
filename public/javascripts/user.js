@@ -35,12 +35,12 @@
 
     /* Sizing chart data */
     const sizingData = [
-      { size: 'XS', chestCm: '96', shoulderCm: '42', lengthCm: '137', sleeveCm: '58', chestIn: '38', shoulderIn: '16.5', lengthIn: '54', sleeveIn: '23' },
-      { size: 'S',  chestCm: '102', shoulderCm: '44', lengthCm: '142', sleeveCm: '60', chestIn: '40', shoulderIn: '17.5', lengthIn: '56', sleeveIn: '23.5' },
-      { size: 'M',  chestCm: '108', shoulderCm: '46', lengthCm: '147', sleeveCm: '62', chestIn: '42.5', shoulderIn: '18', lengthIn: '58', sleeveIn: '24.5' },
-      { size: 'L',  chestCm: '114', shoulderCm: '48', lengthCm: '152', sleeveCm: '64', chestIn: '45', shoulderIn: '19', lengthIn: '60', sleeveIn: '25' },
-      { size: 'XL', chestCm: '120', shoulderCm: '50', lengthCm: '157', sleeveCm: '66', chestIn: '47', shoulderIn: '19.5', lengthIn: '62', sleeveIn: '26' },
-      { size: 'XXL', chestCm: '128', shoulderCm: '52', lengthCm: '162', sleeveCm: '68', chestIn: '50.5', shoulderIn: '20.5', lengthIn: '64', sleeveIn: '27' }
+      { size: 'XS', chestCm: '53.34', shoulderCm: '43.18', lengthCm: '132.08', sleeveCm: '55.88', chestIn: '21', shoulderIn: '17', lengthIn: '52', sleeveIn: '22' },
+{ size: 'S',  chestCm: '55.88', shoulderCm: '43.18', lengthCm: '137.16', sleeveCm: '58.42', chestIn: '22', shoulderIn: '17', lengthIn: '54', sleeveIn: '23' },
+{ size: 'M',  chestCm: '58.42', shoulderCm: '45.72', lengthCm: '142.24', sleeveCm: '62.23', chestIn: '23', shoulderIn: '18', lengthIn: '56', sleeveIn: '24.5' },
+{ size: 'L',  chestCm: '60.96', shoulderCm: '48.26', lengthCm: '147.32', sleeveCm: '64.77', chestIn: '24', shoulderIn: '19', lengthIn: '58', sleeveIn: '25.5' },
+{ size: 'XL', chestCm: '63.50', shoulderCm: '48.26', lengthCm: '152.40', sleeveCm: '66.04', chestIn: '25', shoulderIn: '19', lengthIn: '60', sleeveIn: '26' },
+{ size: 'XXL', chestCm: '66.04', shoulderCm: '50.80', lengthCm: '157.48', sleeveCm: '67.31', chestIn: '26', shoulderIn: '20', lengthIn: '62', sleeveIn: '26.5' }
     ];
 
     /* Luxury Color Swatch Palette Map */
